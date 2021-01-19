@@ -7,6 +7,7 @@ namespace JLL.PizzaProblem.Services
     {
         AuthenticateResponse Authenticate(AuthenticateRequest model);
         IEnumerable<User> GetAll();
+        User AddNewUser(User newUser);
         User GetById(int id);
     }
 }

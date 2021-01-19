@@ -3,6 +3,7 @@ using JLL.PizzaProblem.Models;
 using JLL.PizzaProblem.Services;
 using JLL.PizzaProblem.Helpers;
 using System.Collections.Generic;
+using AutoMapper;
 
 namespace JLL.PizzaProblem.Controllers
 {
@@ -11,10 +12,12 @@ namespace JLL.PizzaProblem.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;
         }
 
         [HttpPost("authenticate")]
@@ -34,6 +37,30 @@ namespace JLL.PizzaProblem.Controllers
         {
             var users = _userService.GetAll();
             return Ok(users);
+        }
+
+        [Authorize]
+        [HttpGet("{Id}", Name = "GetUser")]
+        public ActionResult<IEnumerable<User>> GetUser(int Id)
+        {
+            var user = _userService.GetById(Id);
+            
+            if(user == null)
+            {
+                return NotFound();
+            }
+            
+            return Ok(user);
+        }
+
+        [HttpPost]
+        public ActionResult<User> Post(UserForCreation newUser)
+        {
+            var user = _userService.AddNewUser(_mapper.Map<User>(newUser));
+            
+            return CreatedAtRoute("GetUser",
+                new { user.Id },
+                user);
         }
     }
 }

@@ -1,3 +1,4 @@
+using AutoMapper;
 using JLL.PizzaProblem.Helpers;
 using JLL.PizzaProblem.Models;
 using JLL.PizzaProblem.Services;
@@ -23,6 +24,7 @@ namespace JLL.PizzaProblem
         {
             services.AddCors();
             services.AddControllers();
+            services.AddAutoMapper(typeof(Startup));
 
             // configure appsettings object to get secrets and generate tokens
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));

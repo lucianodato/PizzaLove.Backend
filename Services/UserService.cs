@@ -13,7 +13,7 @@ namespace JLL.PizzaProblem.Services
     public class UserService : IUserService
     {
         // In memory list for now as storage
-        private readonly List<User> _users = new List<User>
+        private List<User> _users = new List<User>
         {
             new User { Id = 1, FirstName = "Test", LastName = "Test", Username = "test", Password = "test" },
             new User { Id = 2, FirstName = "User", LastName = "User", Username = "user", Password = "user" }
@@ -47,6 +47,23 @@ namespace JLL.PizzaProblem.Services
         public User GetById(int id)
         {
             return _users.Find(x => x.Id == id);
+        }
+
+        private int GetNewId()
+        {
+            return _users.Count + 1;
+        }
+
+        public User AddNewUser(User newUser)
+        {
+            if(newUser != null)
+            {
+                newUser.Id = GetNewId();
+                _users.Add(newUser);
+                return _users.Find(x => x.Id == newUser.Id);
+            }
+
+            return null;
         }
 
         private string GenerateJwtToken(User user)
