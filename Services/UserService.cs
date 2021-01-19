@@ -7,23 +7,26 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using JLL.PizzaProblem.Models;
+using AutoMapper;
 
 namespace JLL.PizzaProblem.Services
 {
     public class UserService : IUserService
     {
         // In memory list for now as storage
-        private List<User> _users = new List<User>
+        private readonly List<User> _users = new List<User>
         {
             new User { Id = 1, FirstName = "Test", LastName = "Test", Username = "test", Password = "test" },
             new User { Id = 2, FirstName = "User", LastName = "User", Username = "user", Password = "user" }
         };
 
         private readonly AppSettings _appSettings;
+        private readonly IMapper _mapper;
 
-        public UserService(IOptions<AppSettings> appSettings)
+        public UserService(IOptions<AppSettings> appSettings, IMapper mapper)
         {
             _appSettings = appSettings.Value;
+            _mapper = mapper;
         }
 
         public AuthenticateResponse Authenticate(AuthenticateRequest model)
@@ -33,10 +36,11 @@ namespace JLL.PizzaProblem.Services
             // user was not found so return null
             if (user == null) return null;
 
-            // authentication successful so generate jwt token
-            var token = GenerateJwtToken(user);
+            // authentication successful so generate response with new jwt token
+            var createdAuthenticationResponse = _mapper.Map<AuthenticateResponse>(user);
+            createdAuthenticationResponse.Token = GenerateJwtToken(user);
 
-            return new AuthenticateResponse(user, token);
+            return createdAuthenticationResponse;
         }
 
         public IEnumerable<User> GetAll()
