@@ -56,14 +56,9 @@ namespace JLL.PizzaProblem.Services
 
         public User AddNewUser(User newUser)
         {
-            if(newUser != null)
-            {
-                newUser.Id = GetNewId();
-                _users.Add(newUser);
-                return _users.Find(x => x.Id == newUser.Id);
-            }
-
-            return null;
+            newUser.Id = GetNewId();
+            _users.Add(newUser);
+            return _users.Find(x => x.Id == newUser.Id);
         }
 
         private string GenerateJwtToken(User user)
