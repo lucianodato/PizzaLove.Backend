@@ -30,7 +30,8 @@ namespace JLL.PizzaProblem
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             // configure DI for services
-            services.AddScoped<IUserService, UserService>();
+            // As a singleton for testing simplicity but it should be scoped when persistence available
+            services.AddSingleton<IUserService, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
