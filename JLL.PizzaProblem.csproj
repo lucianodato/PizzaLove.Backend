@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>82040a16-eea2-4447-acc2-e11146b8e15e</UserSecretsId>
+  </PropertyGroup>
+<ItemGroup>
+	<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.6" />
+	<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
+</ItemGroup>
+
+
+</Project>
