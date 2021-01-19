@@ -1,5 +1,5 @@
 using AutoMapper;
-using JLL.PizzaProblem.Helpers;
+using JLL.PizzaProblem.Middleware;
 using JLL.PizzaProblem.Models;
 using JLL.PizzaProblem.Services;
 using Microsoft.AspNetCore.Builder;

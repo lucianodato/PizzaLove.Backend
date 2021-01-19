@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using JLL.PizzaProblem.Models;
 using JLL.PizzaProblem.Services;
 
-namespace JLL.PizzaProblem.Helpers
+namespace JLL.PizzaProblem.Middleware
 {
     public class JwtMiddleware
     {

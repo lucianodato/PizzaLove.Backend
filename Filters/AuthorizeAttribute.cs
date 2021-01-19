@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using JLL.PizzaProblem.Models;
 
-namespace JLL.PizzaProblem.Helpers
+namespace JLL.PizzaProblem.Filters
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class AuthorizeAttribute : Attribute, IAuthorizationFilter
