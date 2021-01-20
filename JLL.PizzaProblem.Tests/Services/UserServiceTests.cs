@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using JLL.PizzaProblem.API.Profiles;
 
-namespace JLL.PizzaProblem.Services.Tests
+namespace JLL.PizzaProblem.API.Services.Tests
 {
     public class UserServiceTests
     {
@@ -101,8 +101,10 @@ namespace JLL.PizzaProblem.Services.Tests
         public void Authenticate_ShouldReturn_NullForInvalidUser()
         {
             // Arrange
-            var newAuthenticateRequest = new AuthenticateRequest {
-                Username = "notFoundUser", Password = "test"
+            var newAuthenticateRequest = new AuthenticateRequest
+            {
+                Username = "notFoundUser",
+                Password = "test"
             };
 
             // Act
@@ -144,6 +146,37 @@ namespace JLL.PizzaProblem.Services.Tests
 
             // Assert
             Assert.Equal(1, response.Id);
+        }
+
+        [Fact]
+        public void IncreasePizzaLoveForUser_ShouldIncreasePizzaLove_ForValidUser()
+        {
+            // Act
+            _testingService.IncreasePizzaLoveForUser(1);
+
+            // Assert
+            Assert.Equal(2, _testingService.GetById(1).PizzaLove);
+        }
+
+        [Fact]
+        public void IncreasePizzaLoveForUser_ShouldNotIncreasePizzaLove_ForInValidUser()
+        {
+            // Act
+            _testingService.IncreasePizzaLoveForUser(0);
+
+            // Assert
+            Assert.Equal(1, _testingService.GetById(1).PizzaLove);
+            Assert.Equal(3, _testingService.GetById(2).PizzaLove);
+        }
+
+        [Fact]
+        public void GetTopTenPizzaLove_ShouldReturn_AListOfUsers()
+        {
+            // Act
+            var list = _testingService.GetTopTenPizzaLove();
+
+            // Assert
+            Assert.Equal(2, list.Count);
         }
     }
 }

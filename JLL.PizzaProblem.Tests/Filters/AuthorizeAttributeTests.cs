@@ -12,7 +12,7 @@ using AutoMapper;
 using JLL.PizzaProblem.API.Profiles;
 using Microsoft.AspNetCore.Mvc;
 
-namespace JLL.PizzaProblem.Filters.Tests
+namespace JLL.PizzaProblem.API.Filters.Tests
 {
     public class AuthorizeAttributeTests
     {

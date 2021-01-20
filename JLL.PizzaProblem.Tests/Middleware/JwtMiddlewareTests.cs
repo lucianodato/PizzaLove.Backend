@@ -14,7 +14,7 @@ using JLL.PizzaProblem.API.Services;
 using AutoMapper;
 using JLL.PizzaProblem.API.Profiles;
 
-namespace JLL.PizzaProblem.Middleware.Tests
+namespace JLL.PizzaProblem.API.Middleware.Tests
 {
     public class JwtMiddlewareTests
     {

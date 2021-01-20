@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Microsoft.AspNetCore.Mvc;
 
-namespace JLL.PizzaProblem.Controllers.Tests
+namespace JLL.PizzaProblem.API.Controllers.Tests
 {
     public class UsersControllerTests
     {
@@ -28,8 +28,8 @@ namespace JLL.PizzaProblem.Controllers.Tests
             _mockUserService = new Mock<IUserService>();
             _usersExample = new List<User>
             {
-                new User { Id = 1, FirstName = "Test", LastName = "Test", Username = "test", Password = "test" },
-                new User { Id = 2, FirstName = "User", LastName = "User", Username = "user", Password = "user" }
+                new User { Id = 1, FirstName = "Test", LastName = "Test", Username = "test", Password = "test", PizzaLove = 1 },
+                new User { Id = 2, FirstName = "User", LastName = "User", Username = "user", Password = "user", PizzaLove = 3 }
             };
             _mockUserService.Setup(x => x.GetAll()).Returns(_usersExample);
             _mockUserService.Setup(x => x.GetById(1)).Returns(_usersExample[0]);
@@ -44,6 +44,7 @@ namespace JLL.PizzaProblem.Controllers.Tests
             _mockUserService
                 .Setup(x => x.Authenticate(It.Is<AuthenticateRequest>(i => i.Username == "user" && i.Password == "user")))
                 .Returns(new AuthenticateResponse());
+            _mockUserService.Setup(x => x.GetTopTenPizzaLove()).Returns(_usersExample);
 
             _userController = new UsersController(_mockUserService.Object, _mockMapper);
         }
@@ -116,7 +117,7 @@ namespace JLL.PizzaProblem.Controllers.Tests
             };
 
             // Act
-            var createdAtRouteResult = _userController.Post(newUser);
+            var createdAtRouteResult = _userController.PostUser(newUser);
 
             // Assert
             Assert.IsType<CreatedAtRouteResult>(createdAtRouteResult.Result);
@@ -135,8 +136,8 @@ namespace JLL.PizzaProblem.Controllers.Tests
             };
 
             // Act
-            var createdAtRouteResult = _userController.Post(newUser);
-            
+            var createdAtRouteResult = _userController.PostUser(newUser);
+
             // Assert
             var result = createdAtRouteResult.Result as CreatedAtRouteResult;
             Assert.IsType<User>(result.Value);
@@ -191,6 +192,39 @@ namespace JLL.PizzaProblem.Controllers.Tests
 
             // Assert
             Assert.IsType<OkObjectResult>(response.Result);
+        }
+
+        [Fact]
+        public void GetTopTenUser_ShouldReturn_AListOfTenUsers()
+        {
+            // Act
+            var response = _userController.GetTopTenUser();
+
+            // Assert
+            var okObjectResult = response.Result as OkObjectResult;
+            List<User> users = Assert.IsType<List<User>>(okObjectResult.Value);
+            Assert.True(users.Count <= 10);
+            //TODO Assert that the list is indeed ordered
+        }
+
+        [Fact]
+        public void IncreasePizzaLoveForUser_ShouldReturn_NoContentResponseWhenSuccessful()
+        {
+            // Act
+            var response = _userController.IncreasePizzaLoveForUser(1);
+
+            // Assert
+            Assert.IsType<NoContentResult>(response);
+        }
+
+        [Fact]
+        public void IncreasePizzaLoveForUser_ShouldReturn_BadRequestForInvalidUser()
+        {
+            // Act
+            var response = _userController.IncreasePizzaLoveForUser(0);
+
+            // Assert
+            Assert.IsType<BadRequestResult>(response);
         }
     }
 }
