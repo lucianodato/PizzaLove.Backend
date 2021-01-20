@@ -1,6 +1,4 @@
-using JLL.PizzaProblem.Models;
-
-namespace JLL.PizzaProblem.Models
+namespace JLL.PizzaProblem.API.Models
 {
     public class AuthenticateResponse
     {

@@ -1,7 +1,7 @@
 using AutoMapper;
-using JLL.PizzaProblem.Middleware;
-using JLL.PizzaProblem.Models;
-using JLL.PizzaProblem.Services;
+using JLL.PizzaProblem.API.Middleware;
+using JLL.PizzaProblem.API.Models;
+using JLL.PizzaProblem.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using JLL.PizzaProblem.Models;
-using JLL.PizzaProblem.Services;
-using JLL.PizzaProblem.Filters;
+using JLL.PizzaProblem.API.Models;
+using JLL.PizzaProblem.API.Services;
+using JLL.PizzaProblem.API.Filters;
 using System.Collections.Generic;
 using AutoMapper;
 
-namespace JLL.PizzaProblem.Controllers
+namespace JLL.PizzaProblem.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using JLL.PizzaProblem.Models;
+using JLL.PizzaProblem.API.Models;
 
-namespace JLL.PizzaProblem.Services
+namespace JLL.PizzaProblem.API.Services
 {
     public interface IUserService
     {

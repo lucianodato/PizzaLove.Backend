@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
-using JLL.PizzaProblem.Models;
+using JLL.PizzaProblem.API.Models;
 
-namespace JLL.PizzaProblem.Filters
+namespace JLL.PizzaProblem.API.Filters
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class AuthorizeAttribute : Attribute, IAuthorizationFilter

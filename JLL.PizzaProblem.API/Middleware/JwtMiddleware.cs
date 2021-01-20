@@ -6,10 +6,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using JLL.PizzaProblem.Models;
-using JLL.PizzaProblem.Services;
+using JLL.PizzaProblem.API.Models;
+using JLL.PizzaProblem.API.Services;
 
-namespace JLL.PizzaProblem.Middleware
+namespace JLL.PizzaProblem.API.Middleware
 {
     public class JwtMiddleware
     {

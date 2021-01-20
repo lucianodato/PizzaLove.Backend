@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace JLL.PizzaProblem.Models
+namespace JLL.PizzaProblem.API.Models
 {
     public class User
     {

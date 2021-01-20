@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace JLL.PizzaProblem.Models
+namespace JLL.PizzaProblem.API.Models
 {
     public class AuthenticateRequest
     {

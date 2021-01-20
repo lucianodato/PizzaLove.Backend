@@ -6,10 +6,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using JLL.PizzaProblem.Models;
+using JLL.PizzaProblem.API.Models;
 using AutoMapper;
 
-namespace JLL.PizzaProblem.Services
+namespace JLL.PizzaProblem.API.Services
 {
     public class UserService : IUserService
     {

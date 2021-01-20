@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using JLL.PizzaProblem.Models;
+using JLL.PizzaProblem.API.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace JLL.PizzaProblem.Profiles
+namespace JLL.PizzaProblem.API.Profiles
 {
     public class UsersProfile : Profile
     {
