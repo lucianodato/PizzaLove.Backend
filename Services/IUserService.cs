@@ -6,7 +6,7 @@ namespace JLL.PizzaProblem.Services
     public interface IUserService
     {
         AuthenticateResponse Authenticate(AuthenticateRequest model);
-        IEnumerable<User> GetAll();
+        List<User> GetAll();
         User AddNewUser(User newUser);
         User GetById(int id);
     }

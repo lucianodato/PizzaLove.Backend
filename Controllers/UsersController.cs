@@ -20,20 +20,9 @@ namespace JLL.PizzaProblem.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost("authenticate")]
-        public ActionResult<AuthenticateResponse> Authenticate(AuthenticateRequest model)
-        {
-            var response = _userService.Authenticate(model);
-
-            if (response == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
-
-            return Ok(response);
-        }
-
         [Authorize]
         [HttpGet]
-        public ActionResult<IEnumerable<User>> GetAll()
+        public ActionResult<List<User>> GetAll()
         {
             var users = _userService.GetAll();
             return Ok(users);
@@ -41,7 +30,7 @@ namespace JLL.PizzaProblem.Controllers
 
         [Authorize]
         [HttpGet("{Id}", Name = "GetUser")]
-        public ActionResult<IEnumerable<User>> GetUser(int Id)
+        public ActionResult<List<User>> GetUser(int Id)
         {
             var user = _userService.GetById(Id);
             
@@ -61,6 +50,17 @@ namespace JLL.PizzaProblem.Controllers
             return CreatedAtRoute("GetUser",
                 new { user.Id },
                 user);
+        }
+
+        [HttpPost("authenticate")]
+        public ActionResult<AuthenticateResponse> Authenticate(AuthenticateRequest model)
+        {
+            var response = _userService.Authenticate(model);
+
+            if (response == null)
+                return BadRequest(new { message = "Username or password is incorrect" });
+
+            return Ok(response);
         }
     }
 }

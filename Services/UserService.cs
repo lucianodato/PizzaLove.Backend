@@ -31,7 +31,7 @@ namespace JLL.PizzaProblem.Services
 
         public AuthenticateResponse Authenticate(AuthenticateRequest model)
         {
-            var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+             var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
 
             // user was not found so return null
             if (user == null) return null;
@@ -43,7 +43,7 @@ namespace JLL.PizzaProblem.Services
             return createdAuthenticationResponse;
         }
 
-        public IEnumerable<User> GetAll()
+        public List<User> GetAll()
         {
             return _users;
         }
@@ -53,16 +53,16 @@ namespace JLL.PizzaProblem.Services
             return _users.Find(x => x.Id == id);
         }
 
-        private int GetNewId()
-        {
-            return _users.Count + 1;
-        }
-
         public User AddNewUser(User newUser)
         {
             newUser.Id = GetNewId();
             _users.Add(newUser);
             return _users.Find(x => x.Id == newUser.Id);
+        }
+
+        private int GetNewId()
+        {
+            return _users.Count + 1;
         }
 
         private string GenerateJwtToken(User user)
