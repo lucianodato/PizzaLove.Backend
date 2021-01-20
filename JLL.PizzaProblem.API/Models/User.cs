@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace JLL.PizzaProblem.API.Models
@@ -9,6 +8,7 @@ namespace JLL.PizzaProblem.API.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Username { get; set; }
+        public int PizzaLove { get; set; }
 
         [JsonIgnore]
         public string Password { get; set; }

@@ -16,8 +16,8 @@ namespace JLL.PizzaProblem.API.Services
         // In memory list for now as storage
         private readonly List<User> _users = new List<User>
         {
-            new User { Id = 1, FirstName = "Test", LastName = "Test", Username = "test", Password = "test" },
-            new User { Id = 2, FirstName = "User", LastName = "User", Username = "user", Password = "user" }
+            new User { Id = 1, FirstName = "Test", LastName = "Test", Username = "test", Password = "test", PizzaLove = 1 },
+            new User { Id = 2, FirstName = "User", LastName = "User", Username = "user", Password = "user", PizzaLove = 3 }
         };
 
         private readonly AppSettings _appSettings;
@@ -58,6 +58,21 @@ namespace JLL.PizzaProblem.API.Services
             newUser.Id = GetNewId();
             _users.Add(newUser);
             return _users.Find(x => x.Id == newUser.Id);
+        }
+
+        public void IncreasePizzaLoveForUser(int Id)
+        {
+            var user = _users.Find(i => i.Id == Id);
+
+            if(user != null)
+            {
+                user.PizzaLove++;
+            }
+        }
+
+        public List<User> GetTopTenPizzaLove()
+        {
+            return _users.OrderByDescending(i => i.PizzaLove).Take(10).ToList();
         }
 
         private int GetNewId()

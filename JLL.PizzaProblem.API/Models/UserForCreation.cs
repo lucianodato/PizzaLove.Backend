@@ -14,5 +14,6 @@ namespace JLL.PizzaProblem.API.Models
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; }
+        public int PizzaLove { get; set; } = 0;
     }
 }

@@ -9,5 +9,7 @@ namespace JLL.PizzaProblem.API.Services
         List<User> GetAll();
         User AddNewUser(User newUser);
         User GetById(int id);
+        List<User> GetTopTenPizzaLove();
+        void IncreasePizzaLoveForUser(int Id);
     }
 }

@@ -8,7 +8,7 @@ using AutoMapper;
 namespace JLL.PizzaProblem.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -42,11 +42,24 @@ namespace JLL.PizzaProblem.API.Controllers
             return Ok(user);
         }
 
+        [HttpGet("GetTopTenUser")]
+        public ActionResult<List<User>> GetTopTenUser()
+        {
+            var users = _userService.GetTopTenPizzaLove();
+
+            if (users == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(users);
+        }
+
         [HttpPost]
-        public ActionResult<User> Post(UserForCreation newUser)
+        public ActionResult<User> PostUser(UserForCreation newUser)
         {
             var user = _userService.AddNewUser(_mapper.Map<User>(newUser));
-            
+
             return CreatedAtRoute("GetUser",
                 new { user.Id },
                 user);
@@ -61,6 +74,20 @@ namespace JLL.PizzaProblem.API.Controllers
                 return BadRequest(new { message = "Username or password is incorrect" });
 
             return Ok(response);
+        }
+
+        [HttpPut("{Id}")]
+        [Authorize]
+        public IActionResult IncreasePizzaLoveForUser(int Id)
+        {
+            if (_userService.GetById(Id) == null)
+            {
+                return BadRequest();
+            }
+
+            _userService.IncreasePizzaLoveForUser(Id);
+
+            return NoContent();
         }
     }
 }
