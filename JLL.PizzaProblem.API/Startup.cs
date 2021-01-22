@@ -25,7 +25,7 @@ namespace JLL.PizzaProblem
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
             services.AddAutoMapper(typeof(Startup));
 
             // configure appsettings object to get secrets and generate tokens

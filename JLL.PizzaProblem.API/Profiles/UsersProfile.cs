@@ -12,6 +12,7 @@ namespace JLL.PizzaProblem.API.Profiles
         public UsersProfile()
         {
             CreateMap<User, UserForCreation>().ReverseMap();
+            CreateMap<User, UserForPatch>().ReverseMap();
             CreateMap<AuthenticateResponse, User>().ReverseMap();
         }
     }

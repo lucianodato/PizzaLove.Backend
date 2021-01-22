@@ -10,6 +10,7 @@ using JLL.PizzaProblem.API.Models;
 using Microsoft.Extensions.Options;
 using Moq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace JLL.PizzaProblem.API.Controllers.Tests
 {
@@ -246,6 +247,48 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
             // Assert
             var result = response.Result as CreatedAtRouteResult;
             Assert.IsType<User>(result.Value);
+        }
+
+        [Fact]
+        public void Patch_ShouldReturn_NotFoundForNotFoundUser()
+        {
+            // Act
+            var response = _userController.Patch(0, new JsonPatchDocument<UserForPatch>());
+
+            // Assert
+            Assert.IsType<NotFoundResult>(response);
+        }
+
+        [Fact]
+        public void Patch_ShouldReturn_BadRequestForNullChanges()
+        {
+            // Act
+            var response = _userController.Patch(1, null);
+
+            // Assert
+            Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public void Patch_ShouldReturn_NoContentForFoundUserAndValidUpdate()
+        {
+            // Arrange
+            var jsonObject = new JsonPatchDocument<UserForPatch>();
+            var userToUpdate = new UserForPatch
+            {
+                FirstName = "Test",
+                LastName = "Test",
+                Username = "test",
+                Password = "test",
+                PizzaLove = 19
+            };
+            jsonObject.Replace(i => i.PizzaLove, userToUpdate.PizzaLove);
+
+            // Act
+            var response = _userController.Patch(1, jsonObject);
+
+            // Assert
+            Assert.IsType<NoContentResult>(response);
         }
     }
 }

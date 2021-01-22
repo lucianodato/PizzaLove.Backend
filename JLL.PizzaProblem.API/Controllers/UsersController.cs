@@ -4,6 +4,7 @@ using JLL.PizzaProblem.API.Services;
 using JLL.PizzaProblem.API.Filters;
 using System.Collections.Generic;
 using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace JLL.PizzaProblem.API.Controllers
 {
@@ -94,6 +95,30 @@ namespace JLL.PizzaProblem.API.Controllers
             _userService.UpdateUser(user);
 
             return NoContent();
+        }
+
+        [HttpPatch]
+        public IActionResult Patch(int Id, [FromBody] JsonPatchDocument<UserForPatch> patchDoc)
+        {
+            var user = _userService.GetById(Id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if(patchDoc != null)
+            {
+                // Update entity fields
+                var tmp = _mapper.Map <UserForPatch>(user);
+                patchDoc.ApplyTo(tmp);
+                user = _mapper.Map<User>(tmp);
+
+                _userService.UpdateUser(user);
+
+                return NoContent();
+            }
+
+            return BadRequest();
         }
     }
 }
