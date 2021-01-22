@@ -60,13 +60,12 @@ namespace JLL.PizzaProblem.API.Services
             return _users.Find(x => x.Id == newUser.Id);
         }
 
-        public void IncreasePizzaLoveForUser(int Id)
+        public void UpdateUser(User userToUpdate)
         {
-            var user = _users.Find(i => i.Id == Id);
-
-            if(user != null)
+            int index = _users.FindIndex(i => i.Id == userToUpdate.Id);
+            if(index != -1)
             {
-                user.PizzaLove++;
+                _users[index] = userToUpdate;
             }
         }
 
@@ -74,6 +73,8 @@ namespace JLL.PizzaProblem.API.Services
         {
             return _users.OrderByDescending(i => i.PizzaLove).Take(10).ToList();
         }
+
+        #region Private methods
 
         private int GetNewId()
         {
@@ -95,5 +96,7 @@ namespace JLL.PizzaProblem.API.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
+        #endregion
     }
 }

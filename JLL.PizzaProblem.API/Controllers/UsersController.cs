@@ -78,14 +78,20 @@ namespace JLL.PizzaProblem.API.Controllers
 
         [HttpPut("{Id}")]
         [Authorize]
-        public IActionResult IncreasePizzaLoveForUser(int Id)
+        public ActionResult<User> Update(int Id, UserForCreation userToUpdate)
         {
             if (_userService.GetById(Id) == null)
             {
-                return BadRequest();
+                var newUser = _userService.AddNewUser(_mapper.Map<User>(userToUpdate));
+
+                return CreatedAtRoute("GetUser",
+                    new { newUser.Id },
+                    newUser);
             }
 
-            _userService.IncreasePizzaLoveForUser(Id);
+            var user = _mapper.Map<User>(userToUpdate);
+            user.Id = Id;
+            _userService.UpdateUser(user);
 
             return NoContent();
         }

@@ -208,23 +208,44 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
         }
 
         [Fact]
-        public void IncreasePizzaLoveForUser_ShouldReturn_NoContentResponseWhenSuccessful()
+        public void UpdateUser_ShouldReturn_NoContentResponseWhenSuccessful()
         {
+            // Arrange
+            var userToUpdate = new UserForCreation
+            {
+                FirstName = "Test",
+                LastName = "Test",
+                Username = "test",
+                Password = "test",
+                PizzaLove = 19
+            };
+
             // Act
-            var response = _userController.IncreasePizzaLoveForUser(1);
+            var response = _userController.Update(1, userToUpdate);
 
             // Assert
-            Assert.IsType<NoContentResult>(response);
+            Assert.IsType<NoContentResult>(response.Result);
         }
 
         [Fact]
-        public void IncreasePizzaLoveForUser_ShouldReturn_BadRequestForInvalidUser()
+        public void UpdateUser_ShouldReturn_NewUserForNotFoundUser()
         {
+            // Arrange
+            var userToCreate = new UserForCreation
+            {
+                FirstName = "Testing",
+                LastName = "Testing",
+                Username = "testing",
+                Password = "testing",
+                PizzaLove = 10
+            };
+
             // Act
-            var response = _userController.IncreasePizzaLoveForUser(0);
+            var response = _userController.Update(5, userToCreate);
 
             // Assert
-            Assert.IsType<BadRequestResult>(response);
+            var result = response.Result as CreatedAtRouteResult;
+            Assert.IsType<User>(result.Value);
         }
     }
 }

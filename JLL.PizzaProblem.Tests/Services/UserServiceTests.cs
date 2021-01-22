@@ -149,24 +149,45 @@ namespace JLL.PizzaProblem.API.Services.Tests
         }
 
         [Fact]
-        public void IncreasePizzaLoveForUser_ShouldIncreasePizzaLove_ForValidUser()
+        public void UpdateUser_Should_DoNothingForInvalidUser()
         {
+            // Arrange
+            var invalidUser = new User
+            {
+                Id = 0,
+                Username = "test",
+                Password = "test",
+                FirstName = "",
+                LastName = "",
+                PizzaLove = 0
+            };
+
             // Act
-            _testingService.IncreasePizzaLoveForUser(1);
+            _testingService.UpdateUser(invalidUser);
 
             // Assert
-            Assert.Equal(2, _testingService.GetById(1).PizzaLove);
+            Assert.True(_testingService.GetById(invalidUser.Id) == null);
         }
 
         [Fact]
-        public void IncreasePizzaLoveForUser_ShouldNotIncreasePizzaLove_ForInValidUser()
+        public void UpdateUser_Should_UpdateValidUser()
         {
+            // Arrange
+            var validUser = new User
+            {
+                Id = 1,
+                Username = "Test",
+                Password = "Test",
+                FirstName = "test",
+                LastName = "test",
+                PizzaLove = 3
+            };
+
             // Act
-            _testingService.IncreasePizzaLoveForUser(0);
+            _testingService.UpdateUser(validUser);
 
             // Assert
-            Assert.Equal(1, _testingService.GetById(1).PizzaLove);
-            Assert.Equal(3, _testingService.GetById(2).PizzaLove);
+            Assert.Equal(3, _testingService.GetById(1).PizzaLove);
         }
 
         [Fact]
