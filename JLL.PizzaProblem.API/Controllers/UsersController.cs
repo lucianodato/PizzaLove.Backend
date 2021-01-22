@@ -99,7 +99,7 @@ namespace JLL.PizzaProblem.API.Controllers
 
         [HttpPatch("{Id}")]
         [Authorize]
-        public ActionResult<User> Patch(int Id, [FromBody] JsonPatchDocument<UserForPatch> patchDoc)
+        public IActionResult Patch(int Id, [FromBody] JsonPatchDocument<UserForPatch> patchDoc)
         {
             var user = _userService.GetById(Id);
             if (user == null)
@@ -117,7 +117,7 @@ namespace JLL.PizzaProblem.API.Controllers
 
                 _userService.UpdateUser(user);
 
-                return Ok(user);
+                return NoContent();
             }
 
             return BadRequest();
