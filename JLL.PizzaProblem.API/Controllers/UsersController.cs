@@ -97,7 +97,8 @@ namespace JLL.PizzaProblem.API.Controllers
             return NoContent();
         }
 
-        [HttpPatch]
+        [HttpPatch("{Id}")]
+        [Authorize]
         public IActionResult Patch(int Id, [FromBody] JsonPatchDocument<UserForPatch> patchDoc)
         {
             var user = _userService.GetById(Id);
