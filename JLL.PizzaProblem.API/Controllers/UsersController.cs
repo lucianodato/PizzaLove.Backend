@@ -77,26 +77,6 @@ namespace JLL.PizzaProblem.API.Controllers
             return Ok(response);
         }
 
-        [HttpPut("{Id}")]
-        [Authorize]
-        public ActionResult<User> Update(int Id, UserForCreation userToUpdate)
-        {
-            if (_userService.GetById(Id) == null)
-            {
-                var newUser = _userService.AddNewUser(_mapper.Map<User>(userToUpdate));
-
-                return CreatedAtRoute("GetUser",
-                    new { newUser.Id },
-                    newUser);
-            }
-
-            var user = _mapper.Map<User>(userToUpdate);
-            user.Id = Id;
-            _userService.UpdateUser(user);
-
-            return NoContent();
-        }
-
         [HttpPatch("{Id}")]
         [Authorize]
         public IActionResult Patch(int Id, [FromBody] JsonPatchDocument<UserForPatch> patchDoc)
