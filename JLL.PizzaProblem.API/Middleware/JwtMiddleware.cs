@@ -11,25 +11,25 @@ using JLL.PizzaProblem.API.Services;
 
 namespace JLL.PizzaProblem.API.Middleware
 {
-    public class JwtMiddleware
+    public class JwtMiddleware :IMiddleware
     {
-        private readonly RequestDelegate _next;
         private readonly AppSettings _appSettings;
+        private readonly IUserService _userService;
 
-        public JwtMiddleware(RequestDelegate next, IOptions<AppSettings> appSettings)
+        public JwtMiddleware(IUserService userService, IOptions<AppSettings> appSettings)
         {
-            _next = next;
+            _userService = userService;
             _appSettings = appSettings.Value;
         }
 
-        public async Task Invoke(HttpContext context, IUserService userService)
+        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
-                AttachUserToContext(context, userService, token);
+                AttachUserToContext(context, _userService, token);
 
-            await _next(context);
+             await next(context);
         }
 
         private void AttachUserToContext(HttpContext context, IUserService userService, string token)

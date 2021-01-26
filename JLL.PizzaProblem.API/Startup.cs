@@ -4,6 +4,7 @@ using JLL.PizzaProblem.API.Models;
 using JLL.PizzaProblem.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -33,6 +34,7 @@ namespace JLL.PizzaProblem
 
             // configure DI for services
             // As a singleton for testing simplicity but it should be scoped when persistence available
+            services.AddTransient<JwtMiddleware>();
             services.AddSingleton<IUserService, UserService>();
         }
 

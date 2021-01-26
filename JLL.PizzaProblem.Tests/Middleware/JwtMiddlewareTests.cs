@@ -42,7 +42,7 @@ namespace JLL.PizzaProblem.API.Middleware.Tests
             _mockContext = new DefaultHttpContext();
             _next = async (HttpContext hc) => await Task.CompletedTask;
 
-            _authenticationMiddleware = new JwtMiddleware(_next, _testingOptions);
+            _authenticationMiddleware = new JwtMiddleware(_testingService, _testingOptions);
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace JLL.PizzaProblem.API.Middleware.Tests
             _mockContext.Request.Headers.Add("Authorization", response.Token);
 
             // Act
-            await _authenticationMiddleware.Invoke(_mockContext, _testingService);
+            await _authenticationMiddleware.InvokeAsync(_mockContext, _next);
 
             // Assert
             Assert.True(_mockContext.Items.TryGetValue("User", out var header));
@@ -73,7 +73,7 @@ namespace JLL.PizzaProblem.API.Middleware.Tests
             _mockContext.Request.Headers.Add("Authorization", "ThisIsAnInvalidToken");
 
             // Act
-            await _authenticationMiddleware.Invoke(_mockContext, _testingService);
+            await _authenticationMiddleware.InvokeAsync(_mockContext, _next);
 
             // Assert
             Assert.False(_mockContext.Items.TryGetValue("User", out var header));
