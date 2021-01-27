@@ -10,6 +10,7 @@ using JLL.PizzaProblem.API.Models;
 using AutoMapper;
 using JLL.PizzaProblem.API.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace JLL.PizzaProblem.API.Services
 {
@@ -28,9 +29,9 @@ namespace JLL.PizzaProblem.API.Services
             _mapper = mapper;
         }
 
-        public AuthenticateResponse Authenticate(AuthenticateRequest model)
+        public async Task<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest model)
         {
-            var user = _context.Users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+            var user = await _context.Users.SingleOrDefaultAsync(x => x.Username == model.Username && x.Password == model.Password);
 
             // user was not found so return null
             if (user == null) return null;
@@ -42,36 +43,40 @@ namespace JLL.PizzaProblem.API.Services
             return createdAuthenticationResponse;
         }
 
-        public List<User> GetAll()
+        public async Task<List<User>> GetAllAsync()
         {
-            return _context.Users.ToList();
+            return await _context.Users.ToListAsync();
         }
 
-        public User GetById(int id)
+        public async Task<User> GetByIdAsync(int id)
         {
-            return _context.Users.AsNoTracking().FirstOrDefault(x => x.Id == id);
+            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public User AddNewUser(User newUser)
+        public async Task<User> AddNewUserAsync(User newUser)
         {
             newUser.Id = GetNewId();
             _context.Users.Add(newUser);
             _context.SaveChanges();
-            return _context.Users.FirstOrDefault(x => x.Id == newUser.Id);
+            return await _context.Users.FirstOrDefaultAsync(x => x.Id == newUser.Id);
         }
 
-        public void UpdateUser(User userToUpdate)
+        public async Task<bool> UpdateUserAsync(User userToUpdate)
         {
             if(_context.Users.AsNoTracking().FirstOrDefault(x => x.Id == userToUpdate.Id) != null)
             {
                 _context.Users.Update(userToUpdate);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
+
+                return true;
             }
+
+            return false;
         }
 
-        public List<User> GetTopTenPizzaLove()
+        public async Task<List<User>> GetTopTenPizzaLoveAsync()
         {
-            return _context.Users.OrderByDescending(i => i.PizzaLove).Take(10).ToList();
+            return await _context.Users.OrderByDescending(i => i.PizzaLove).Take(10).ToListAsync();
         }
 
         #region Private methods

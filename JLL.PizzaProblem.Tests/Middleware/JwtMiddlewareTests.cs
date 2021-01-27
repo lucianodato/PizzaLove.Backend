@@ -63,7 +63,7 @@ namespace JLL.PizzaProblem.API.Middleware.Tests
                 Username = "user",
                 Password = "user"
             };
-            var response = _testingService.Authenticate(newAuthenticateRequest);
+            var response = await _testingService.AuthenticateAsync(newAuthenticateRequest);
             _mockContext.Request.Headers.Add("Authorization", response.Token);
 
             // Act
@@ -71,8 +71,8 @@ namespace JLL.PizzaProblem.API.Middleware.Tests
 
             // Assert
             Assert.True(_mockContext.Items.TryGetValue("User", out var header));
-            var user = header as User;
-            Assert.Equal(2, user.Id);
+            var user = header as Task<User>;
+            Assert.Equal(2, user.Result.Id);
         }
 
         [Fact]

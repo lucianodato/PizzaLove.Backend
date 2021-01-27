@@ -13,6 +13,7 @@ using JLL.PizzaProblem.API.Profiles;
 using Microsoft.AspNetCore.Mvc;
 using JLL.PizzaProblem.API.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace JLL.PizzaProblem.API.Filters.Tests
 {
@@ -20,13 +21,13 @@ namespace JLL.PizzaProblem.API.Filters.Tests
     {
         private readonly AppSettings _testingSettings;
         private readonly IOptions<AppSettings> _testingOptions;
-        private readonly HttpContext _mockContext;
+        private readonly HttpContext _mockHttpContext;
         private readonly IUserService _testingService;
         private readonly IMapper _mockMapper;
         private readonly ActionContext _actionContext;
         private readonly AuthorizationFilterContext _authorizationFilterContext;
         private readonly AuthorizeAttribute _authorizeAttribute;
-        private readonly PizzaProblemContext _context;
+        private readonly PizzaProblemContext _pizzaContext;
 
         public AuthorizeAttributeTests()
         {
@@ -38,18 +39,18 @@ namespace JLL.PizzaProblem.API.Filters.Tests
             var mapperConfig = new MapperConfiguration(cfg => cfg.AddProfile(new UsersProfile()));
             _mockMapper = mapperConfig.CreateMapper();
 
-            _context = new PizzaProblemContext(
+            _pizzaContext = new PizzaProblemContext(
                 new DbContextOptionsBuilder<PizzaProblemContext>()
                             .UseInMemoryDatabase(databaseName: "AuthorizeAttributeTests")
                             .Options);
-            _context.Database.EnsureCreated();
+            _pizzaContext.Database.EnsureCreated();
 
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+            _testingService = new UserService(_testingOptions, _mockMapper, _pizzaContext);
 
-            _mockContext = new DefaultHttpContext();
+            _mockHttpContext = new DefaultHttpContext();
 
             _actionContext =
-                new ActionContext(_mockContext,
+                new ActionContext(_mockHttpContext,
                   new Microsoft.AspNetCore.Routing.RouteData(),
                   new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor());
 
@@ -60,7 +61,7 @@ namespace JLL.PizzaProblem.API.Filters.Tests
         }
 
         [Fact]
-        public void OnAuthorization_ShouldReturn_NotNullForExistentUser()
+        public async Task OnAuthorization_ShouldReturn_NotNullForExistentUser()
         {
             // Arrange
             var newAuthenticateRequest = new AuthenticateRequest
@@ -70,15 +71,19 @@ namespace JLL.PizzaProblem.API.Filters.Tests
             };
 
             // Act
-            _testingService.Authenticate(newAuthenticateRequest);
-            _authorizeAttribute.OnAuthorization(_authorizationFilterContext);
+            var response = await _testingService.AuthenticateAsync(newAuthenticateRequest);
+
+            var taskSource = new TaskCompletionSource<User>();
+            taskSource.SetResult(_mockMapper.Map<User>(response));
+            _authorizationFilterContext.HttpContext.Items["User"] = taskSource.Task;
+            await _authorizeAttribute.OnAuthorizationAsync(_authorizationFilterContext);
 
             // Assert
-            Assert.NotNull(_authorizationFilterContext.Result);
+            Assert.Null(_authorizationFilterContext.Result);
         }
 
         [Fact]
-        public void OnAuthorization_ShouldReturn_UnauthorizedForNonExistentUser()
+        public async Task OnAuthorization_ShouldReturn_UnauthorizedForNonExistentUser()
         {
             // Arrange
             var newAuthenticateRequest = new AuthenticateRequest
@@ -88,8 +93,12 @@ namespace JLL.PizzaProblem.API.Filters.Tests
             };
 
             // Act
-            _testingService.Authenticate(newAuthenticateRequest);
-            _authorizeAttribute.OnAuthorization(_authorizationFilterContext);
+            var response = await _testingService.AuthenticateAsync(newAuthenticateRequest);
+
+            var taskSource = new TaskCompletionSource<User>();
+            taskSource.SetResult(_mockMapper.Map<User>(response));
+            _authorizationFilterContext.HttpContext.Items["User"] = taskSource.Task;
+            await _authorizeAttribute.OnAuthorizationAsync(_authorizationFilterContext);
 
             // Assert
             var result = _authorizationFilterContext.Result as JsonResult;

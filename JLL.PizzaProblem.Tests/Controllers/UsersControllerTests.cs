@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
+using System.Threading.Tasks;
 
 namespace JLL.PizzaProblem.API.Controllers.Tests
 {
@@ -32,40 +33,40 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
                 new User { Id = 1, FirstName = "Test", LastName = "Test", Username = "test", Password = "test", PizzaLove = 1 },
                 new User { Id = 2, FirstName = "User", LastName = "User", Username = "user", Password = "user", PizzaLove = 3 }
             };
-            _mockUserService.Setup(x => x.GetAll()).Returns(_usersExample);
-            _mockUserService.Setup(x => x.GetById(1)).Returns(_usersExample[0]);
-            _mockUserService.Setup(x => x.GetById(3)).Returns(_usersExample[0]);
-            _mockUserService.Setup(x => x.AddNewUser(It.IsAny<User>())).Returns(_usersExample[1]);
+            _mockUserService.Setup(x => x.GetAllAsync()).ReturnsAsync(_usersExample);
+            _mockUserService.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(_usersExample[0]);
+            _mockUserService.Setup(x => x.GetByIdAsync(3)).ReturnsAsync(_usersExample[0]);
+            _mockUserService.Setup(x => x.AddNewUserAsync(It.IsAny<User>())).ReturnsAsync(_usersExample[1]);
             _mockUserService
-                .Setup(x => x.Authenticate(It.Is<AuthenticateRequest>(i => i.Username == "userrrr")))
-                .Returns((AuthenticateResponse)null);
+                .Setup(x => x.AuthenticateAsync(It.Is<AuthenticateRequest>(i => i.Username == "userrrr")))
+                .ReturnsAsync((AuthenticateResponse)null);
             _mockUserService
-                .Setup(x => x.Authenticate(It.Is<AuthenticateRequest>(i => i.Password == "userrrr")))
-                .Returns((AuthenticateResponse)null);
+                .Setup(x => x.AuthenticateAsync(It.Is<AuthenticateRequest>(i => i.Password == "userrrr")))
+                .ReturnsAsync((AuthenticateResponse)null);
             _mockUserService
-                .Setup(x => x.Authenticate(It.Is<AuthenticateRequest>(i => i.Username == "user" && i.Password == "user")))
-                .Returns(new AuthenticateResponse());
-            _mockUserService.Setup(x => x.GetTopTenPizzaLove()).Returns(_usersExample);
+                .Setup(x => x.AuthenticateAsync(It.Is<AuthenticateRequest>(i => i.Username == "user" && i.Password == "user")))
+                .ReturnsAsync(new AuthenticateResponse());
+            _mockUserService.Setup(x => x.GetTopTenPizzaLoveAsync()).ReturnsAsync(_usersExample);
 
             _userController = new UsersController(_mockUserService.Object, _mockMapper);
         }
 
 
         [Fact]
-        public void GetAll_WhenCalled_ReturnsOkResult()
+        public async Task GetAll_WhenCalled_ReturnsOkResult()
         {
             // Act
-            var okResult = _userController.GetAll();
+            var okResult = await _userController.GetAllAsync();
 
             // Assert
             Assert.IsType<OkObjectResult>(okResult.Result);
         }
 
         [Fact]
-        public void GetAll_WhenCalled_ReturnsAllUsers()
+        public async Task GetAll_WhenCalled_ReturnsAllUsers()
         {
             // Act
-            var okObject = _userController.GetAll();
+            var okObject = await _userController.GetAllAsync();
 
             // Assert
             var okObjectResult = okObject.Result as ObjectResult;
@@ -74,30 +75,30 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
         }
 
         [Fact]
-        public void GetUser_WithInvalidId_ReturnsNotFound()
+        public async Task GetUser_WithInvalidId_ReturnsNotFound()
         {
             // Act
-            var okResult = _userController.GetUser(0);
+            var okResult = await _userController.GetUserAsync(0);
 
             // Assert
             Assert.IsType<NotFoundResult>(okResult.Result);
         }
 
         [Fact]
-        public void GetUser_WithValidId_ReturnsOkResult()
+        public async Task GetUser_WithValidId_ReturnsOkResult()
         {
             // Act
-            var okResult = _userController.GetUser(1);
+            var okResult = await _userController.GetUserAsync(1);
 
             // Assert
             Assert.IsType<OkObjectResult>(okResult.Result);
         }
 
         [Fact]
-        public void GetUser_WithValidId_ReturnsUser()
+        public async Task GetUser_WithValidId_ReturnsUser()
         {
             // Act
-            var okObject = _userController.GetUser(1);
+            var okObject = await _userController.GetUserAsync(1);
 
             // Assert
             var okObjectResult = okObject.Result as ObjectResult;
@@ -106,7 +107,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
         }
 
         [Fact]
-        public void Post_WithValidUser_ReturnsCreatedAtRouteResult()
+        public async Task Post_WithValidUser_ReturnsCreatedAtRouteResult()
         {
             // Arrange
             var newUser = new UserForCreation
@@ -118,14 +119,14 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
             };
 
             // Act
-            var createdAtRouteResult = _userController.PostUser(newUser);
+            var createdAtRouteResult = await _userController.PostUserAsync(newUser);
 
             // Assert
             Assert.IsType<CreatedAtRouteResult>(createdAtRouteResult.Result);
         }
 
         [Fact]
-        public void Post_WithValidUser_ReturnsCreatedUser()
+        public async Task Post_WithValidUser_ReturnsCreatedUser()
         {
             // Arrange
             var newUser = new UserForCreation
@@ -137,7 +138,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
             };
 
             // Act
-            var createdAtRouteResult = _userController.PostUser(newUser);
+            var createdAtRouteResult = await _userController.PostUserAsync(newUser);
 
             // Assert
             var result = createdAtRouteResult.Result as CreatedAtRouteResult;
@@ -145,7 +146,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
         }
 
         [Fact]
-        public void Authenticate_ShouldReturn_BadRequestWhenUserIsInvalid()
+        public async Task Authenticate_ShouldReturn_BadRequestWhenUserIsInvalid()
         {
             // Arrange
             var newAuthenticationRequest = new AuthenticateRequest
@@ -155,14 +156,14 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
             };
 
             // Act
-            var response = _userController.Authenticate(newAuthenticationRequest);
+            var response = await _userController.AuthenticateAsync(newAuthenticationRequest);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(response.Result);
         }
 
         [Fact]
-        public void Authenticate_ShouldReturn_BadRequestWhenPasswordIsInvalid()
+        public async Task Authenticate_ShouldReturn_BadRequestWhenPasswordIsInvalid()
         {
             // Arrange
             var newAuthenticationRequest = new AuthenticateRequest
@@ -172,14 +173,14 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
             };
 
             // Act
-            var response = _userController.Authenticate(newAuthenticationRequest);
+            var response = await _userController.AuthenticateAsync(newAuthenticationRequest);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(response.Result);
         }
 
         [Fact]
-        public void Authenticate_ShouldReturn_OkResultWhenUserIsValid()
+        public async Task Authenticate_ShouldReturn_OkResultWhenUserIsValid()
         {
             // Arrange
             var newAuthenticationRequest = new AuthenticateRequest
@@ -189,17 +190,17 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
             };
 
             // Act
-            var response = _userController.Authenticate(newAuthenticationRequest);
+            var response = await _userController.AuthenticateAsync(newAuthenticationRequest);
 
             // Assert
             Assert.IsType<OkObjectResult>(response.Result);
         }
 
         [Fact]
-        public void GetTopTenUser_ShouldReturn_AListOfTenUsers()
+        public async Task GetTopTenUser_ShouldReturn_AListOfTenUsers()
         {
             // Act
-            var response = _userController.GetTopTenUser();
+            var response = await _userController.GetTopTenUserAsync();
 
             // Assert
             var okObjectResult = response.Result as OkObjectResult;
@@ -209,27 +210,27 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
         }
 
         [Fact]
-        public void Patch_ShouldReturn_NotFoundForNotFoundUser()
+        public async Task Patch_ShouldReturn_NotFoundForNotFoundUser()
         {
             // Act
-            var response = _userController.Patch(0, new JsonPatchDocument<UserForPatch>());
+            var response = await _userController.PatchAsync(0, new JsonPatchDocument<UserForPatch>());
 
             // Assert
             Assert.IsType<NotFoundResult>(response);
         }
 
         [Fact]
-        public void Patch_ShouldReturn_BadRequestForNullChanges()
+        public async Task Patch_ShouldReturn_BadRequestForNullChanges()
         {
             // Act
-            var response = _userController.Patch(1, null);
+            var response = await _userController.PatchAsync(1, null);
 
             // Assert
             Assert.IsType<BadRequestResult>(response);
         }
 
         [Fact]
-        public void Patch_ShouldReturn_NoContentForFoundUserAndValidUpdate()
+        public async Task Patch_ShouldReturn_NoContentForFoundUserAndValidUpdate()
         {
             // Arrange
             var jsonObject = new JsonPatchDocument<UserForPatch>();
@@ -244,7 +245,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
             jsonObject.Replace(i => i.PizzaLove, userToUpdate.PizzaLove);
 
             // Act
-            var response = _userController.Patch(1, jsonObject);
+            var response = await _userController.PatchAsync(1, jsonObject);
 
             // Assert
             Assert.IsType<NoContentResult>(response);
