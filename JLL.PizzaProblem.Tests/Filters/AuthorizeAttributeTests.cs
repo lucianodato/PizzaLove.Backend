@@ -11,6 +11,8 @@ using JLL.PizzaProblem.API.Services;
 using AutoMapper;
 using JLL.PizzaProblem.API.Profiles;
 using Microsoft.AspNetCore.Mvc;
+using JLL.PizzaProblem.API.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace JLL.PizzaProblem.API.Filters.Tests
 {
@@ -24,6 +26,7 @@ namespace JLL.PizzaProblem.API.Filters.Tests
         private readonly ActionContext _actionContext;
         private readonly AuthorizationFilterContext _authorizationFilterContext;
         private readonly AuthorizeAttribute _authorizeAttribute;
+        private readonly PizzaProblemContext _context;
 
         public AuthorizeAttributeTests()
         {
@@ -35,7 +38,13 @@ namespace JLL.PizzaProblem.API.Filters.Tests
             var mapperConfig = new MapperConfiguration(cfg => cfg.AddProfile(new UsersProfile()));
             _mockMapper = mapperConfig.CreateMapper();
 
-            _testingService = new UserService(_testingOptions, _mockMapper);
+            _context = new PizzaProblemContext(
+                new DbContextOptionsBuilder<PizzaProblemContext>()
+                            .UseInMemoryDatabase(databaseName: "AuthorizeAttributeTests")
+                            .Options);
+            _context.Database.EnsureCreated();
+
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
 
             _mockContext = new DefaultHttpContext();
 

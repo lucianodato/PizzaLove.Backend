@@ -8,30 +8,29 @@ using System.Security.Claims;
 using System.Text;
 using JLL.PizzaProblem.API.Models;
 using AutoMapper;
+using JLL.PizzaProblem.API.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace JLL.PizzaProblem.API.Services
 {
     public class UserService : IUserService
     {
         // In memory list for now as storage
-        private readonly List<User> _users = new List<User>
-        {
-            new User { Id = 1, FirstName = "Test", LastName = "Test", Username = "test", Password = "test", PizzaLove = 1 },
-            new User { Id = 2, FirstName = "User", LastName = "User", Username = "user", Password = "user", PizzaLove = 3 }
-        };
-
+        private readonly PizzaProblemContext _context;
         private readonly AppSettings _appSettings;
         private readonly IMapper _mapper;
 
-        public UserService(IOptions<AppSettings> appSettings, IMapper mapper)
+        public UserService(IOptions<AppSettings> appSettings, IMapper mapper, PizzaProblemContext context)
         {
+            _context = context;
+            _context.Database.EnsureCreated();
             _appSettings = appSettings.Value;
             _mapper = mapper;
         }
 
         public AuthenticateResponse Authenticate(AuthenticateRequest model)
         {
-             var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+            var user = _context.Users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
 
             // user was not found so return null
             if (user == null) return null;
@@ -45,40 +44,41 @@ namespace JLL.PizzaProblem.API.Services
 
         public List<User> GetAll()
         {
-            return _users;
+            return _context.Users.ToList();
         }
 
         public User GetById(int id)
         {
-            return _users.Find(x => x.Id == id);
+            return _context.Users.AsNoTracking().FirstOrDefault(x => x.Id == id);
         }
 
         public User AddNewUser(User newUser)
         {
             newUser.Id = GetNewId();
-            _users.Add(newUser);
-            return _users.Find(x => x.Id == newUser.Id);
+            _context.Users.Add(newUser);
+            _context.SaveChanges();
+            return _context.Users.FirstOrDefault(x => x.Id == newUser.Id);
         }
 
         public void UpdateUser(User userToUpdate)
         {
-            int index = _users.FindIndex(i => i.Id == userToUpdate.Id);
-            if(index != -1)
+            if(_context.Users.AsNoTracking().FirstOrDefault(x => x.Id == userToUpdate.Id) != null)
             {
-                _users[index] = userToUpdate;
+                _context.Users.Update(userToUpdate);
+                _context.SaveChanges();
             }
         }
 
         public List<User> GetTopTenPizzaLove()
         {
-            return _users.OrderByDescending(i => i.PizzaLove).Take(10).ToList();
+            return _context.Users.OrderByDescending(i => i.PizzaLove).Take(10).ToList();
         }
 
         #region Private methods
 
         private int GetNewId()
         {
-            return _users.Count + 1;
+            return _context.Users.Count() + 1;
         }
 
         private string GenerateJwtToken(User user)

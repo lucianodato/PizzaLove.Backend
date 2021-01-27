@@ -8,6 +8,8 @@ using JLL.PizzaProblem.API.Models;
 using Microsoft.Extensions.Options;
 using Moq;
 using JLL.PizzaProblem.API.Profiles;
+using JLL.PizzaProblem.API.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace JLL.PizzaProblem.API.Services.Tests
 {
@@ -16,7 +18,8 @@ namespace JLL.PizzaProblem.API.Services.Tests
         private readonly AppSettings _testingSettings;
         private readonly IOptions<AppSettings> _testingOptions;
         private readonly IMapper _mockMapper;
-        private readonly IUserService _testingService;
+        private IUserService _testingService;
+        private PizzaProblemContext _context;
 
         public UserServiceTests()
         {
@@ -27,13 +30,19 @@ namespace JLL.PizzaProblem.API.Services.Tests
 
             var mapperConfig = new MapperConfiguration(cfg => cfg.AddProfile(new UsersProfile()));
             _mockMapper = mapperConfig.CreateMapper();
-
-            _testingService = new UserService(_testingOptions, _mockMapper);
         }
 
         [Fact]
         public void GetAll_ShouldReturn_NotNullCollectionInitially()
         {
+            // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+
             // Act
             var listOfUsers = _testingService.GetAll();
 
@@ -44,6 +53,14 @@ namespace JLL.PizzaProblem.API.Services.Tests
         [Fact]
         public void GetAll_ShouldReturn_LenghtOfTwoInitially()
         {
+            // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "GetAll")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+
             // Act
             var listOfUsers = _testingService.GetAll();
 
@@ -54,6 +71,14 @@ namespace JLL.PizzaProblem.API.Services.Tests
         [Fact]
         public void GetById_ShouldReturn_ValidUser()
         {
+            // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+
             // Act
             var firstUser = _testingService.GetById(1);
 
@@ -64,6 +89,14 @@ namespace JLL.PizzaProblem.API.Services.Tests
         [Fact]
         public void GetById_ShouldReturn_NullForNonExistentUser()
         {
+            // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+
             // Act
             var firstUser = _testingService.GetById(0);
 
@@ -75,6 +108,12 @@ namespace JLL.PizzaProblem.API.Services.Tests
         public void AddNewUser_ShouldCreate_ANewIdForTheNewUser()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "AddNewUser")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var newUser = new User { Id = 0, FirstName = "Test", LastName = "Test", Username = "test", Password = "test" };
 
             // Act
@@ -88,6 +127,12 @@ namespace JLL.PizzaProblem.API.Services.Tests
         public void AddNewUser_ShouldCreate_AValidUser()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var newUser = new User { Id = 0, FirstName = "Test", LastName = "Test", Username = "test", Password = "test" };
 
             // Act
@@ -101,6 +146,12 @@ namespace JLL.PizzaProblem.API.Services.Tests
         public void Authenticate_ShouldReturn_NullForInvalidUser()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var newAuthenticateRequest = new AuthenticateRequest
             {
                 Username = "notFoundUser",
@@ -118,6 +169,12 @@ namespace JLL.PizzaProblem.API.Services.Tests
         public void Authenticate_ShouldReturn_NullForInvalidPassword()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var newAuthenticateRequest = new AuthenticateRequest
             {
                 Username = "test",
@@ -135,6 +192,12 @@ namespace JLL.PizzaProblem.API.Services.Tests
         public void Authenticate_ShouldReturn_AValidResponseForValidUser()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "Authenticate")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var newAuthenticateRequest = new AuthenticateRequest
             {
                 Username = "test",
@@ -152,9 +215,15 @@ namespace JLL.PizzaProblem.API.Services.Tests
         public void UpdateUser_Should_DoNothingForInvalidUser()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UpdateUser")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var invalidUser = new User
             {
-                Id = 0,
+                Id = 10,
                 Username = "test",
                 Password = "test",
                 FirstName = "",
@@ -173,6 +242,12 @@ namespace JLL.PizzaProblem.API.Services.Tests
         public void UpdateUser_Should_UpdateValidUser()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var validUser = new User
             {
                 Id = 1,
@@ -193,6 +268,14 @@ namespace JLL.PizzaProblem.API.Services.Tests
         [Fact]
         public void GetTopTenPizzaLove_ShouldReturn_AListOfUsers()
         {
+            // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "GetTopTenPizzaLove")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+
             // Act
             var list = _testingService.GetTopTenPizzaLove();
 

@@ -13,6 +13,8 @@ using Microsoft.Extensions.Primitives;
 using JLL.PizzaProblem.API.Services;
 using AutoMapper;
 using JLL.PizzaProblem.API.Profiles;
+using JLL.PizzaProblem.API.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace JLL.PizzaProblem.API.Middleware.Tests
 {
@@ -22,6 +24,7 @@ namespace JLL.PizzaProblem.API.Middleware.Tests
         private readonly IOptions<AppSettings> _testingOptions;
         private readonly IMapper _mockMapper;
         private readonly IUserService _testingService;
+        private readonly PizzaProblemContext _context;
         private readonly HttpContext _mockContext;
         private readonly RequestDelegate _next;
         private readonly JwtMiddleware _authenticationMiddleware;
@@ -37,7 +40,13 @@ namespace JLL.PizzaProblem.API.Middleware.Tests
             var mapperConfig = new MapperConfiguration(cfg => cfg.AddProfile(new UsersProfile()));
             _mockMapper = mapperConfig.CreateMapper();
 
-            _testingService = new UserService(_testingOptions, _mockMapper);
+            _context = new PizzaProblemContext(
+                new DbContextOptionsBuilder<PizzaProblemContext>()
+                            .UseInMemoryDatabase(databaseName: "MiddlewareTests")
+                            .Options);
+            _context.Database.EnsureCreated();
+
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
 
             _mockContext = new DefaultHttpContext();
             _next = async (HttpContext hc) => await Task.CompletedTask;
