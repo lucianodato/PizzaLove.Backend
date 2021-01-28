@@ -4,16 +4,17 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Filters;
-using JLL.PizzaProblem.API.Models;
+using JLL.PizzaProblem.Domain;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
-using JLL.PizzaProblem.API.Services;
+using JLL.PizzaProblem.Services;
 using AutoMapper;
-using JLL.PizzaProblem.API.Profiles;
+using JLL.PizzaProblem.Core;
 using Microsoft.AspNetCore.Mvc;
-using JLL.PizzaProblem.API.Data;
+using JLL.PizzaProblem.DataAccess.EF;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using JLL.PizzaProblem.API.Middleware;
 
 namespace JLL.PizzaProblem.API.Filters.Tests
 {
@@ -64,7 +65,7 @@ namespace JLL.PizzaProblem.API.Filters.Tests
         public async Task OnAuthorization_ShouldReturn_NotNullForExistentUser()
         {
             // Arrange
-            var newAuthenticateRequest = new AuthenticateRequest
+            var newAuthenticateRequest = new AuthenticateRequestDto
             {
                 Username = "user",
                 Password = "user"
@@ -73,8 +74,8 @@ namespace JLL.PizzaProblem.API.Filters.Tests
             // Act
             var response = await _testingService.AuthenticateAsync(newAuthenticateRequest);
 
-            var taskSource = new TaskCompletionSource<User>();
-            taskSource.SetResult(_mockMapper.Map<User>(response));
+            var taskSource = new TaskCompletionSource<UserDto>();
+            taskSource.SetResult(_mockMapper.Map<UserDto>(response));
             _authorizationFilterContext.HttpContext.Items["User"] = taskSource.Task;
             await _authorizeAttribute.OnAuthorizationAsync(_authorizationFilterContext);
 
@@ -86,7 +87,7 @@ namespace JLL.PizzaProblem.API.Filters.Tests
         public async Task OnAuthorization_ShouldReturn_UnauthorizedForNonExistentUser()
         {
             // Arrange
-            var newAuthenticateRequest = new AuthenticateRequest
+            var newAuthenticateRequest = new AuthenticateRequestDto
             {
                 Username = "NonExistentUser",
                 Password = "user"
@@ -95,8 +96,8 @@ namespace JLL.PizzaProblem.API.Filters.Tests
             // Act
             var response = await _testingService.AuthenticateAsync(newAuthenticateRequest);
 
-            var taskSource = new TaskCompletionSource<User>();
-            taskSource.SetResult(_mockMapper.Map<User>(response));
+            var taskSource = new TaskCompletionSource<UserDto>();
+            taskSource.SetResult(_mockMapper.Map<UserDto>(response));
             _authorizationFilterContext.HttpContext.Items["User"] = taskSource.Task;
             await _authorizeAttribute.OnAuthorizationAsync(_authorizationFilterContext);
 

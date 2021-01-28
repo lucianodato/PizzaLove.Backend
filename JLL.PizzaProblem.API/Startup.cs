@@ -1,16 +1,16 @@
 using AutoMapper;
-using JLL.PizzaProblem.API.Data;
+using JLL.PizzaProblem.API.Profiles;
 using JLL.PizzaProblem.API.Middleware;
-using JLL.PizzaProblem.API.Models;
-using JLL.PizzaProblem.API.Services;
+using JLL.PizzaProblem.DataAccess.EF;
+using JLL.PizzaProblem.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace JLL.PizzaProblem
 {

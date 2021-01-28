@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using JLL.PizzaProblem.Domain;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using JLL.PizzaProblem.API.Models;
 
-namespace JLL.PizzaProblem.API.Services
+namespace JLL.PizzaProblem.Services
 {
     public interface IUserService
     {

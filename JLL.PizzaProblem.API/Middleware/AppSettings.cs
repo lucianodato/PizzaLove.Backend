@@ -1,4 +1,4 @@
-namespace JLL.PizzaProblem.API.Models
+namespace JLL.PizzaProblem.API.Middleware
 {
     public class AppSettings
     {

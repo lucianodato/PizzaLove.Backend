@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace JLL.PizzaProblem.API.Models
+namespace JLL.PizzaProblem.API.Dtos
 {
-    public class UserForCreation
+    public class UserForCreationDto
     {
         [Required]
         public string FirstName { get; set; }

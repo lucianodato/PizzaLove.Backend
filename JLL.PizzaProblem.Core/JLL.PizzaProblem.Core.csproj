@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.6" />
+		<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="5.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.11" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
+		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\JLL.PizzaProblem.Domain\JLL.PizzaProblem.Domain.csproj" />
+	  <ProjectReference Include="..\JLL.PizzaProblem.Services\JLL.PizzaProblem.Services.csproj" />
+	</ItemGroup>
+
+</Project>

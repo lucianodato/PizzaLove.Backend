@@ -3,17 +3,16 @@ using JLL.PizzaProblem.API.Middleware;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using JLL.PizzaProblem.API.Models;
+using JLL.PizzaProblem.Domain;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
-using Moq;
 using Microsoft.AspNetCore.Http.Features;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Primitives;
-using JLL.PizzaProblem.API.Services;
+using JLL.PizzaProblem.Services;
 using AutoMapper;
-using JLL.PizzaProblem.API.Profiles;
-using JLL.PizzaProblem.API.Data;
+using JLL.PizzaProblem.Core;
+using JLL.PizzaProblem.DataAccess.EF;
 using Microsoft.EntityFrameworkCore;
 
 namespace JLL.PizzaProblem.API.Middleware.Tests
@@ -58,7 +57,7 @@ namespace JLL.PizzaProblem.API.Middleware.Tests
         public async Task Invoke_AttachsUserToContext_WhenTokenNotNull()
         {
             // Arrange
-            var newAuthenticateRequest = new AuthenticateRequest
+            var newAuthenticateRequest = new AuthenticateRequestDto
             {
                 Username = "user",
                 Password = "user"
@@ -71,7 +70,7 @@ namespace JLL.PizzaProblem.API.Middleware.Tests
 
             // Assert
             Assert.True(_mockContext.Items.TryGetValue("User", out var header));
-            var user = header as Task<User>;
+            var user = header as Task<UserDto>;
             Assert.Equal(2, user.Result.Id);
         }
 

@@ -1,39 +1,16 @@
-﻿using Xunit;
-using JLL.PizzaProblem.API.Services;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using AutoMapper;
-using JLL.PizzaProblem.API.Models;
-using Microsoft.Extensions.Options;
-using Moq;
-using JLL.PizzaProblem.API.Profiles;
-using JLL.PizzaProblem.DataAccess.EF;
+﻿using JLL.PizzaProblem.DataAccess.EF;
+using JLL.PizzaProblem.Domain;
+using JLL.PizzaProblem.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
-using JLL.PizzaProblem.API.Middleware;
-using JLL.PizzaProblem.Services;
+using Xunit;
 
 namespace JLL.PizzaProblem.API.Services.Tests
 {
     public class UserServiceTests
     {
-        private readonly AppSettings _testingSettings;
-        private readonly IOptions<AppSettings> _testingOptions;
-        private readonly IMapper _mockMapper;
         private IUserService _testingService;
         private PizzaProblemContext _context;
-
-        public UserServiceTests()
-        {
-            _testingSettings = new AppSettings();
-            _testingSettings.Secret = "THIS IS MY VERY LONG TESTING SECRET THAT NO ONE SHOULD KNOW";
-            // Arrange testing service for all the testing class
-            _testingOptions = Options.Create(_testingSettings);
-
-            var mapperConfig = new MapperConfiguration(cfg => cfg.AddProfile(new UsersProfile()));
-            _mockMapper = mapperConfig.CreateMapper();
-        }
 
         [Fact]
         public async Task GetAll_ShouldReturn_NotNullCollectionInitially()
@@ -44,7 +21,7 @@ namespace JLL.PizzaProblem.API.Services.Tests
                            .UseInMemoryDatabase(databaseName: "UserServiceTests")
                            .Options);
             _context.Database.EnsureCreated();
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+            _testingService = new UserService(_context);
 
             // Act
             var listOfUsers = await _testingService.GetAllAsync();
@@ -62,7 +39,7 @@ namespace JLL.PizzaProblem.API.Services.Tests
                            .UseInMemoryDatabase(databaseName: "GetAll")
                            .Options);
             _context.Database.EnsureCreated();
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+            _testingService = new UserService(_context);
 
             // Act
             var listOfUsers = await _testingService.GetAllAsync();
@@ -80,7 +57,7 @@ namespace JLL.PizzaProblem.API.Services.Tests
                            .UseInMemoryDatabase(databaseName: "UserServiceTests")
                            .Options);
             _context.Database.EnsureCreated();
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+            _testingService = new UserService(_context);
 
             // Act
             var firstUser = await _testingService.GetByIdAsync(1);
@@ -98,7 +75,7 @@ namespace JLL.PizzaProblem.API.Services.Tests
                            .UseInMemoryDatabase(databaseName: "UserServiceTests")
                            .Options);
             _context.Database.EnsureCreated();
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+            _testingService = new UserService(_context);
 
             // Act
             var firstUser = await _testingService.GetByIdAsync(0);
@@ -116,8 +93,8 @@ namespace JLL.PizzaProblem.API.Services.Tests
                            .UseInMemoryDatabase(databaseName: "AddNewUser")
                            .Options);
             _context.Database.EnsureCreated();
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
-            var newUser = new UserDto { Id = 0, FirstName = "Test", LastName = "Test", Username = "test", Password = "test" };
+            _testingService = new UserService(_context);
+            var newUser = new User { Id = 0, FirstName = "Test", LastName = "Test", Username = "test", Password = "test" };
 
             // Act
             var addedUser = await _testingService.AddNewUserAsync(newUser);
@@ -135,14 +112,14 @@ namespace JLL.PizzaProblem.API.Services.Tests
                            .UseInMemoryDatabase(databaseName: "UserServiceTests")
                            .Options);
             _context.Database.EnsureCreated();
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
-            var newUser = new UserDto { Id = 0, FirstName = "Test", LastName = "Test", Username = "test", Password = "test" };
+            _testingService = new UserService(_context);
+            var newUser = new User { Id = 0, FirstName = "Test", LastName = "Test", Username = "test", Password = "test" };
 
             // Act
             var addedUser = await _testingService.AddNewUserAsync(newUser);
 
             // Assert
-            Assert.IsType<UserDto>(addedUser);
+            Assert.IsType<User>(addedUser);
         }
 
         [Fact]
@@ -154,8 +131,8 @@ namespace JLL.PizzaProblem.API.Services.Tests
                            .UseInMemoryDatabase(databaseName: "UserServiceTests")
                            .Options);
             _context.Database.EnsureCreated();
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
-            var newAuthenticateRequest = new AuthenticateRequestDto
+            _testingService = new UserService(_context);
+            var newAuthenticateRequest = new AuthenticateRequest
             {
                 Username = "notFoundUser",
                 Password = "test"
@@ -177,8 +154,8 @@ namespace JLL.PizzaProblem.API.Services.Tests
                            .UseInMemoryDatabase(databaseName: "UserServiceTests")
                            .Options);
             _context.Database.EnsureCreated();
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
-            var newAuthenticateRequest = new AuthenticateRequestDto
+            _testingService = new UserService(_context);
+            var newAuthenticateRequest = new AuthenticateRequest
             {
                 Username = "test",
                 Password = "notAValidPassword"
@@ -200,8 +177,8 @@ namespace JLL.PizzaProblem.API.Services.Tests
                            .UseInMemoryDatabase(databaseName: "Authenticate")
                            .Options);
             _context.Database.EnsureCreated();
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
-            var newAuthenticateRequest = new AuthenticateRequestDto
+            _testingService = new UserService(_context);
+            var newAuthenticateRequest = new AuthenticateRequest
             {
                 Username = "test",
                 Password = "test"
@@ -223,8 +200,8 @@ namespace JLL.PizzaProblem.API.Services.Tests
                            .UseInMemoryDatabase(databaseName: "UpdateUser")
                            .Options);
             _context.Database.EnsureCreated();
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
-            var invalidUser = new UserDto
+            _testingService = new UserService(_context);
+            var invalidUser = new User
             {
                 Id = 10,
                 Username = "test",
@@ -250,8 +227,8 @@ namespace JLL.PizzaProblem.API.Services.Tests
                            .UseInMemoryDatabase(databaseName: "UserServiceTests")
                            .Options);
             _context.Database.EnsureCreated();
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
-            var validUser = new UserDto
+            _testingService = new UserService(_context);
+            var validUser = new User
             {
                 Id = 1,
                 Username = "Test",
@@ -278,7 +255,7 @@ namespace JLL.PizzaProblem.API.Services.Tests
                            .UseInMemoryDatabase(databaseName: "GetTopTenPizzaLove")
                            .Options);
             _context.Database.EnsureCreated();
-            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+            _testingService = new UserService(_context);
 
             // Act
             var list = await _testingService.GetTopTenPizzaLoveAsync();
