@@ -8,30 +8,30 @@ using System.Security.Claims;
 using System.Text;
 using JLL.PizzaProblem.API.Models;
 using AutoMapper;
+using JLL.PizzaProblem.API.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace JLL.PizzaProblem.API.Services
 {
     public class UserService : IUserService
     {
         // In memory list for now as storage
-        private readonly List<User> _users = new List<User>
-        {
-            new User { Id = 1, FirstName = "Test", LastName = "Test", Username = "test", Password = "test", PizzaLove = 1 },
-            new User { Id = 2, FirstName = "User", LastName = "User", Username = "user", Password = "user", PizzaLove = 3 }
-        };
-
+        private readonly PizzaProblemContext _context;
         private readonly AppSettings _appSettings;
         private readonly IMapper _mapper;
 
-        public UserService(IOptions<AppSettings> appSettings, IMapper mapper)
+        public UserService(IOptions<AppSettings> appSettings, IMapper mapper, PizzaProblemContext context)
         {
+            _context = context;
+            _context.Database.EnsureCreated();
             _appSettings = appSettings.Value;
             _mapper = mapper;
         }
 
-        public AuthenticateResponse Authenticate(AuthenticateRequest model)
+        public async Task<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest model)
         {
-             var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+            var user = await _context.Users.SingleOrDefaultAsync(x => x.Username == model.Username && x.Password == model.Password);
 
             // user was not found so return null
             if (user == null) return null;
@@ -43,42 +43,47 @@ namespace JLL.PizzaProblem.API.Services
             return createdAuthenticationResponse;
         }
 
-        public List<User> GetAll()
+        public async Task<List<User>> GetAllAsync()
         {
-            return _users;
+            return await _context.Users.ToListAsync();
         }
 
-        public User GetById(int id)
+        public async Task<User> GetByIdAsync(int id)
         {
-            return _users.Find(x => x.Id == id);
+            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public User AddNewUser(User newUser)
+        public async Task<User> AddNewUserAsync(User newUser)
         {
             newUser.Id = GetNewId();
-            _users.Add(newUser);
-            return _users.Find(x => x.Id == newUser.Id);
+            _context.Users.Add(newUser);
+            _context.SaveChanges();
+            return await _context.Users.FirstOrDefaultAsync(x => x.Id == newUser.Id);
         }
 
-        public void UpdateUser(User userToUpdate)
+        public async Task<bool> UpdateUserAsync(User userToUpdate)
         {
-            int index = _users.FindIndex(i => i.Id == userToUpdate.Id);
-            if(index != -1)
+            if(_context.Users.AsNoTracking().FirstOrDefault(x => x.Id == userToUpdate.Id) != null)
             {
-                _users[index] = userToUpdate;
+                _context.Users.Update(userToUpdate);
+                await _context.SaveChangesAsync();
+
+                return true;
             }
+
+            return false;
         }
 
-        public List<User> GetTopTenPizzaLove()
+        public async Task<List<User>> GetTopTenPizzaLoveAsync()
         {
-            return _users.OrderByDescending(i => i.PizzaLove).Take(10).ToList();
+            return await _context.Users.OrderByDescending(i => i.PizzaLove).Take(10).ToListAsync();
         }
 
         #region Private methods
 
         private int GetNewId()
         {
-            return _users.Count + 1;
+            return _context.Users.Count() + 1;
         }
 
         private string GenerateJwtToken(User user)

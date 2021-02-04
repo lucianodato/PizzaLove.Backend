@@ -8,6 +8,9 @@ using JLL.PizzaProblem.API.Models;
 using Microsoft.Extensions.Options;
 using Moq;
 using JLL.PizzaProblem.API.Profiles;
+using JLL.PizzaProblem.API.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace JLL.PizzaProblem.API.Services.Tests
 {
@@ -16,7 +19,8 @@ namespace JLL.PizzaProblem.API.Services.Tests
         private readonly AppSettings _testingSettings;
         private readonly IOptions<AppSettings> _testingOptions;
         private readonly IMapper _mockMapper;
-        private readonly IUserService _testingService;
+        private IUserService _testingService;
+        private PizzaProblemContext _context;
 
         public UserServiceTests()
         {
@@ -27,80 +31,128 @@ namespace JLL.PizzaProblem.API.Services.Tests
 
             var mapperConfig = new MapperConfiguration(cfg => cfg.AddProfile(new UsersProfile()));
             _mockMapper = mapperConfig.CreateMapper();
-
-            _testingService = new UserService(_testingOptions, _mockMapper);
         }
 
         [Fact]
-        public void GetAll_ShouldReturn_NotNullCollectionInitially()
+        public async Task GetAll_ShouldReturn_NotNullCollectionInitially()
         {
+            // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+
             // Act
-            var listOfUsers = _testingService.GetAll();
+            var listOfUsers = await _testingService.GetAllAsync();
 
             // Assert
             Assert.NotNull(listOfUsers);
         }
 
         [Fact]
-        public void GetAll_ShouldReturn_LenghtOfTwoInitially()
+        public async Task GetAll_ShouldReturn_LenghtOfTwoInitially()
         {
+            // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "GetAll")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+
             // Act
-            var listOfUsers = _testingService.GetAll();
+            var listOfUsers = await _testingService.GetAllAsync();
 
             // Assert
             Assert.Equal(2, listOfUsers.Count);
         }
 
         [Fact]
-        public void GetById_ShouldReturn_ValidUser()
+        public async Task GetById_ShouldReturn_ValidUser()
         {
+            // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+
             // Act
-            var firstUser = _testingService.GetById(1);
+            var firstUser = await _testingService.GetByIdAsync(1);
 
             // Assert
             Assert.Equal(1, firstUser.Id);
         }
 
         [Fact]
-        public void GetById_ShouldReturn_NullForNonExistentUser()
+        public async Task GetById_ShouldReturn_NullForNonExistentUser()
         {
+            // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+
             // Act
-            var firstUser = _testingService.GetById(0);
+            var firstUser = await _testingService.GetByIdAsync(0);
 
             // Assert
             Assert.Null(firstUser);
         }
 
         [Fact]
-        public void AddNewUser_ShouldCreate_ANewIdForTheNewUser()
+        public async Task AddNewUser_ShouldCreate_ANewIdForTheNewUser()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "AddNewUser")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var newUser = new User { Id = 0, FirstName = "Test", LastName = "Test", Username = "test", Password = "test" };
 
             // Act
-            var addedUser = _testingService.AddNewUser(newUser);
+            var addedUser = await _testingService.AddNewUserAsync(newUser);
 
             // Assert
             Assert.Equal(3, addedUser.Id);
         }
 
         [Fact]
-        public void AddNewUser_ShouldCreate_AValidUser()
+        public async Task AddNewUser_ShouldCreate_AValidUser()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var newUser = new User { Id = 0, FirstName = "Test", LastName = "Test", Username = "test", Password = "test" };
 
             // Act
-            var addedUser = _testingService.AddNewUser(newUser);
+            var addedUser = await _testingService.AddNewUserAsync(newUser);
 
             // Assert
             Assert.IsType<User>(addedUser);
         }
 
         [Fact]
-        public void Authenticate_ShouldReturn_NullForInvalidUser()
+        public async Task Authenticate_ShouldReturn_NullForInvalidUser()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var newAuthenticateRequest = new AuthenticateRequest
             {
                 Username = "notFoundUser",
@@ -108,16 +160,22 @@ namespace JLL.PizzaProblem.API.Services.Tests
             };
 
             // Act
-            var response = _testingService.Authenticate(newAuthenticateRequest);
+            var response = await _testingService.AuthenticateAsync(newAuthenticateRequest);
 
             // Assert
             Assert.Null(response);
         }
 
         [Fact]
-        public void Authenticate_ShouldReturn_NullForInvalidPassword()
+        public async Task Authenticate_ShouldReturn_NullForInvalidPassword()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var newAuthenticateRequest = new AuthenticateRequest
             {
                 Username = "test",
@@ -125,16 +183,22 @@ namespace JLL.PizzaProblem.API.Services.Tests
             };
 
             // Act
-            var response = _testingService.Authenticate(newAuthenticateRequest);
+            var response = await _testingService.AuthenticateAsync(newAuthenticateRequest);
 
             // Assert
             Assert.Null(response);
         }
 
         [Fact]
-        public void Authenticate_ShouldReturn_AValidResponseForValidUser()
+        public async Task Authenticate_ShouldReturn_AValidResponseForValidUser()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "Authenticate")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var newAuthenticateRequest = new AuthenticateRequest
             {
                 Username = "test",
@@ -142,19 +206,25 @@ namespace JLL.PizzaProblem.API.Services.Tests
             };
 
             // Act
-            var response = _testingService.Authenticate(newAuthenticateRequest);
+            var response = await _testingService.AuthenticateAsync(newAuthenticateRequest);
 
             // Assert
             Assert.Equal(1, response.Id);
         }
 
         [Fact]
-        public void UpdateUser_Should_DoNothingForInvalidUser()
+        public async Task UpdateUser_Should_DoNothingForInvalidUser()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UpdateUser")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var invalidUser = new User
             {
-                Id = 0,
+                Id = 10,
                 Username = "test",
                 Password = "test",
                 FirstName = "",
@@ -163,16 +233,22 @@ namespace JLL.PizzaProblem.API.Services.Tests
             };
 
             // Act
-            _testingService.UpdateUser(invalidUser);
+            await _testingService.UpdateUserAsync(invalidUser);
 
             // Assert
-            Assert.True(_testingService.GetById(invalidUser.Id) == null);
+            Assert.True(await _testingService.GetByIdAsync(invalidUser.Id) == null);
         }
 
         [Fact]
-        public void UpdateUser_Should_UpdateValidUser()
+        public async Task UpdateUser_Should_UpdateValidUser()
         {
             // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "UserServiceTests")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
             var validUser = new User
             {
                 Id = 1,
@@ -184,17 +260,26 @@ namespace JLL.PizzaProblem.API.Services.Tests
             };
 
             // Act
-            _testingService.UpdateUser(validUser);
+            await _testingService.UpdateUserAsync(validUser);
 
             // Assert
-            Assert.Equal(3, _testingService.GetById(1).PizzaLove);
+            var user = await _testingService.GetByIdAsync(1);
+            Assert.Equal(3, user.PizzaLove);
         }
 
         [Fact]
-        public void GetTopTenPizzaLove_ShouldReturn_AListOfUsers()
+        public async Task GetTopTenPizzaLove_ShouldReturn_AListOfUsers()
         {
+            // Arrange
+            _context = new PizzaProblemContext(
+               new DbContextOptionsBuilder<PizzaProblemContext>()
+                           .UseInMemoryDatabase(databaseName: "GetTopTenPizzaLove")
+                           .Options);
+            _context.Database.EnsureCreated();
+            _testingService = new UserService(_testingOptions, _mockMapper, _context);
+
             // Act
-            var list = _testingService.GetTopTenPizzaLove();
+            var list = await _testingService.GetTopTenPizzaLoveAsync();
 
             // Assert
             Assert.Equal(2, list.Count);

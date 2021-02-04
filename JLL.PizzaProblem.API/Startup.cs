@@ -1,9 +1,12 @@
 using AutoMapper;
+using JLL.PizzaProblem.API.Data;
 using JLL.PizzaProblem.API.Middleware;
 using JLL.PizzaProblem.API.Models;
 using JLL.PizzaProblem.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,10 +33,13 @@ namespace JLL.PizzaProblem
 
             // configure appsettings object to get secrets and generate tokens
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            // DI for in memory database
+            services.AddDbContext<PizzaProblemContext>(options => options.UseInMemoryDatabase(databaseName: "PizzaProblem"));
 
             // configure DI for services
             // As a singleton for testing simplicity but it should be scoped when persistence available
-            services.AddSingleton<IUserService, UserService>();
+            services.AddTransient<JwtMiddleware>();
+            services.AddTransient<IUserService, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

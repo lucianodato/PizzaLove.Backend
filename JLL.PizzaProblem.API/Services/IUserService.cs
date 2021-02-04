@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using JLL.PizzaProblem.API.Models;
 
 namespace JLL.PizzaProblem.API.Services
 {
     public interface IUserService
     {
-        AuthenticateResponse Authenticate(AuthenticateRequest model);
-        List<User> GetAll();
-        User AddNewUser(User newUser);
-        User GetById(int id);
-        List<User> GetTopTenPizzaLove();
-        void UpdateUser(User userToUpdate);
+        Task<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest model);
+        Task<List<User>> GetAllAsync();
+        Task<User> AddNewUserAsync(User newUser);
+        Task<User> GetByIdAsync(int id);
+        Task<List<User>> GetTopTenPizzaLoveAsync();
+        Task<bool> UpdateUserAsync(User userToUpdate);
     }
 }

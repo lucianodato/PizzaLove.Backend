@@ -5,6 +5,7 @@ using JLL.PizzaProblem.API.Filters;
 using System.Collections.Generic;
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
+using System.Threading.Tasks;
 
 namespace JLL.PizzaProblem.API.Controllers
 {
@@ -23,17 +24,17 @@ namespace JLL.PizzaProblem.API.Controllers
 
         [Authorize]
         [HttpGet]
-        public ActionResult<List<User>> GetAll()
+        public async Task<ActionResult<List<User>>> GetAllAsync()
         {
-            var users = _userService.GetAll();
+            var users = await _userService.GetAllAsync();
             return Ok(users);
         }
 
         [Authorize]
         [HttpGet("{Id}", Name = "GetUser")]
-        public ActionResult<List<User>> GetUser(int Id)
+        public async Task<ActionResult<List<User>>> GetUserAsync(int Id)
         {
-            var user = _userService.GetById(Id);
+            var user = await _userService.GetByIdAsync(Id);
             
             if(user == null)
             {
@@ -44,9 +45,9 @@ namespace JLL.PizzaProblem.API.Controllers
         }
 
         [HttpGet("GetTopTenUser")]
-        public ActionResult<List<User>> GetTopTenUser()
+        public async Task<ActionResult<List<User>>> GetTopTenUserAsync()
         {
-            var users = _userService.GetTopTenPizzaLove();
+            var users = await _userService.GetTopTenPizzaLoveAsync();
 
             if (users == null)
             {
@@ -57,9 +58,9 @@ namespace JLL.PizzaProblem.API.Controllers
         }
 
         [HttpPost]
-        public ActionResult<User> PostUser(UserForCreation newUser)
+        public async Task<ActionResult<User>> PostUserAsync(UserForCreation newUser)
         {
-            var user = _userService.AddNewUser(_mapper.Map<User>(newUser));
+            var user = await _userService.AddNewUserAsync(_mapper.Map<User>(newUser));
 
             return CreatedAtRoute("GetUser",
                 new { user.Id },
@@ -67,9 +68,9 @@ namespace JLL.PizzaProblem.API.Controllers
         }
 
         [HttpPost("authenticate")]
-        public ActionResult<AuthenticateResponse> Authenticate(AuthenticateRequest model)
+        public async Task<ActionResult<AuthenticateResponse>> AuthenticateAsync(AuthenticateRequest model)
         {
-            var response = _userService.Authenticate(model);
+            var response = await _userService.AuthenticateAsync(model);
 
             if (response == null)
                 return BadRequest(new { message = "Username or password is incorrect" });
@@ -79,9 +80,9 @@ namespace JLL.PizzaProblem.API.Controllers
 
         [HttpPatch("{Id}")]
         [Authorize]
-        public IActionResult Patch(int Id, [FromBody] JsonPatchDocument<UserForPatch> patchDoc)
+        public async Task<IActionResult> PatchAsync(int Id, [FromBody] JsonPatchDocument<UserForPatch> patchDoc)
         {
-            var user = _userService.GetById(Id);
+            var user = await _userService.GetByIdAsync(Id);
             if (user == null)
             {
                 return NotFound();
@@ -95,7 +96,7 @@ namespace JLL.PizzaProblem.API.Controllers
                 user = _mapper.Map<User>(tmp);
                 user.Id = Id;
 
-                _userService.UpdateUser(user);
+                await _userService.UpdateUserAsync(user);
 
                 return NoContent();
             }
