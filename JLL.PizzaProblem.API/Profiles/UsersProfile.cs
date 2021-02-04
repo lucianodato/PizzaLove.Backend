@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
-using JLL.PizzaProblem.API.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using JLL.PizzaProblem.API.Dtos;
+using JLL.PizzaProblem.Domain;
 
 namespace JLL.PizzaProblem.API.Profiles
 {
@@ -11,9 +8,9 @@ namespace JLL.PizzaProblem.API.Profiles
     {
         public UsersProfile()
         {
-            CreateMap<User, UserForCreation>().ReverseMap();
-            CreateMap<User, UserForPatch>().ReverseMap();
-            CreateMap<AuthenticateResponse, User>().ReverseMap();
+            CreateMap<User, UserForCreationDto>().ReverseMap();
+            CreateMap<User, UserForPatchDto>().ReverseMap();
+            CreateMap<User, UserDto>().ReverseMap();
         }
     }
 }

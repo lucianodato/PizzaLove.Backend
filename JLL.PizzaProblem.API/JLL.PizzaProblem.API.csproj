@@ -4,13 +4,16 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>82040a16-eea2-4447-acc2-e11146b8e15e</UserSecretsId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="5.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.11" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
+  </ItemGroup>
 <ItemGroup>
-	<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.6" />
-	<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="5.0.2" />
-	<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.11" />
-	<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.11" />
-	<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
-	<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
+  <ProjectReference Include="..\JLL.PizzaProblem.Domain\JLL.PizzaProblem.Domain.csproj" />
+  <ProjectReference Include="..\JLL.PizzaProblem.Services\JLL.PizzaProblem.Services.csproj" />
 </ItemGroup>
 
 

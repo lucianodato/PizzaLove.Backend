@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using JLL.PizzaProblem.API.Models;
-using JLL.PizzaProblem.API.Services;
+﻿using AutoMapper;
+using JLL.PizzaProblem.API.Dtos;
 using JLL.PizzaProblem.API.Filters;
-using System.Collections.Generic;
-using AutoMapper;
+using JLL.PizzaProblem.API.Middleware;
+using JLL.PizzaProblem.Domain;
+using JLL.PizzaProblem.Services;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace JLL.PizzaProblem.API.Controllers
@@ -15,24 +18,29 @@ namespace JLL.PizzaProblem.API.Controllers
     {
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly AppSettings _appSettings;
 
-        public UsersController(IUserService userService, IMapper mapper)
+        public UsersController(
+            IOptions<AppSettings> appSettings, 
+            IUserService userService,
+            IMapper mapper)
         {
+            _appSettings = appSettings.Value;
             _userService = userService;
             _mapper = mapper;
         }
 
         [Authorize]
         [HttpGet]
-        public async Task<ActionResult<List<User>>> GetAllAsync()
+        public async Task<ActionResult<List<UserDto>>> GetAllAsync()
         {
             var users = await _userService.GetAllAsync();
-            return Ok(users);
+            return Ok(_mapper.Map<List<UserDto>>(users));
         }
 
         [Authorize]
         [HttpGet("{Id}", Name = "GetUser")]
-        public async Task<ActionResult<List<User>>> GetUserAsync(int Id)
+        public async Task<ActionResult<List<UserDto>>> GetUserAsync(int Id)
         {
             var user = await _userService.GetByIdAsync(Id);
             
@@ -41,11 +49,11 @@ namespace JLL.PizzaProblem.API.Controllers
                 return NotFound();
             }
             
-            return Ok(user);
+            return Ok(_mapper.Map<UserDto>(user));
         }
 
         [HttpGet("GetTopTenUser")]
-        public async Task<ActionResult<List<User>>> GetTopTenUserAsync()
+        public async Task<ActionResult<List<UserDto>>> GetTopTenUserAsync()
         {
             var users = await _userService.GetTopTenPizzaLoveAsync();
 
@@ -54,33 +62,36 @@ namespace JLL.PizzaProblem.API.Controllers
                 return NotFound();
             }
 
-            return Ok(users);
+            return Ok(_mapper.Map<List<UserDto>>(users));
         }
 
         [HttpPost]
-        public async Task<ActionResult<User>> PostUserAsync(UserForCreation newUser)
+        public async Task<ActionResult<UserDto>> PostUserAsync(UserForCreationDto newUser)
         {
             var user = await _userService.AddNewUserAsync(_mapper.Map<User>(newUser));
 
             return CreatedAtRoute("GetUser",
                 new { user.Id },
-                user);
+                _mapper.Map<UserDto>(user));
         }
 
         [HttpPost("authenticate")]
-        public async Task<ActionResult<AuthenticateResponse>> AuthenticateAsync(AuthenticateRequest model)
+        public async Task<ActionResult<AuthenticateResponseDto>> AuthenticateAsync(AuthenticateRequestDto model)
         {
-            var response = await _userService.AuthenticateAsync(model);
+            var request = _mapper.Map<AuthenticateRequest>(model);
+            var response = await _userService.AuthenticateAsync(request);
 
             if (response == null)
                 return BadRequest(new { message = "Username or password is incorrect" });
 
-            return Ok(response);
+            response.Token = JwtTokenGenerator.GenerateJwtToken(response.Id, _appSettings.Secret);
+
+            return Ok(_mapper.Map<AuthenticateResponseDto>(response));
         }
 
         [HttpPatch("{Id}")]
         [Authorize]
-        public async Task<IActionResult> PatchAsync(int Id, [FromBody] JsonPatchDocument<UserForPatch> patchDoc)
+        public async Task<IActionResult> PatchAsync(int Id, [FromBody] JsonPatchDocument<UserForPatchDto> patchDoc)
         {
             var user = await _userService.GetByIdAsync(Id);
             if (user == null)
@@ -91,7 +102,7 @@ namespace JLL.PizzaProblem.API.Controllers
             if(patchDoc != null)
             {
                 // Update entity fields
-                var tmp = _mapper.Map <UserForPatch>(user);
+                var tmp = _mapper.Map <UserForPatchDto>(user);
                 patchDoc.ApplyTo(tmp);
                 user = _mapper.Map<User>(tmp);
                 user.Id = Id;

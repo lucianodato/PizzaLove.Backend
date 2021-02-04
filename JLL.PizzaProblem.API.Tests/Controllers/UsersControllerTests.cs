@@ -1,17 +1,16 @@
-﻿using Xunit;
-using JLL.PizzaProblem.API.Controllers;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using AutoMapper;
-using JLL.PizzaProblem.API.Profiles;
-using JLL.PizzaProblem.API.Services;
-using JLL.PizzaProblem.API.Models;
-using Microsoft.Extensions.Options;
-using Moq;
-using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using JLL.PizzaProblem.Domain;
+using JLL.PizzaProblem.Services;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Xunit;
+using JLL.PizzaProblem.API.Dtos;
+using JLL.PizzaProblem.API.Middleware;
+using Microsoft.Extensions.Options;
+using JLL.PizzaProblem.API.Profiles;
 
 namespace JLL.PizzaProblem.API.Controllers.Tests
 {
@@ -19,13 +18,22 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
     {
         private readonly IMapper _mockMapper;
         private readonly Mock<IUserService> _mockUserService;
+        private readonly AppSettings _appSettings;
+        private readonly IOptions<AppSettings> _appOptions;
         private readonly List<User> _usersExample;
         private readonly UsersController _userController;
 
         public UsersControllerTests()
         {
-            var mapperConfig = new MapperConfiguration(cfg => cfg.AddProfile(new UsersProfile()));
-            _mockMapper = mapperConfig.CreateMapper();
+            _appSettings = new AppSettings();
+            _appSettings.Secret = "THIS IS MY VERY LONG TESTING SECRET THAT NO ONE SHOULD KNOW";
+            // Arrange testing service for all the testing class
+            _appOptions = Options.Create(_appSettings);
+
+            var mapperConfig = new MapperConfiguration(cfg => {
+                cfg.AddProfile<UsersProfile>();
+                cfg.AddProfile<AuthenticateProfile>();
+            }); _mockMapper = mapperConfig.CreateMapper();
 
             _mockUserService = new Mock<IUserService>();
             _usersExample = new List<User>
@@ -48,7 +56,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
                 .ReturnsAsync(new AuthenticateResponse());
             _mockUserService.Setup(x => x.GetTopTenPizzaLoveAsync()).ReturnsAsync(_usersExample);
 
-            _userController = new UsersController(_mockUserService.Object, _mockMapper);
+            _userController = new UsersController(_appOptions, _mockUserService.Object, _mockMapper);
         }
 
 
@@ -70,7 +78,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
 
             // Assert
             var okObjectResult = okObject.Result as ObjectResult;
-            List<User> users = Assert.IsType<List<User>>(okObjectResult.Value);
+            List<UserDto> users = Assert.IsType<List<UserDto>>(okObjectResult.Value);
             Assert.Equal(2, users.Count);
         }
 
@@ -102,7 +110,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
 
             // Assert
             var okObjectResult = okObject.Result as ObjectResult;
-            User returnedUser = Assert.IsType<User>(okObjectResult.Value);
+            UserDto returnedUser = Assert.IsType<UserDto>(okObjectResult.Value);
             Assert.Equal(1, returnedUser.Id);
         }
 
@@ -110,7 +118,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
         public async Task Post_WithValidUser_ReturnsCreatedAtRouteResult()
         {
             // Arrange
-            var newUser = new UserForCreation
+            var newUser = new UserForCreationDto
             {
                 FirstName = "User",
                 LastName = "User",
@@ -129,7 +137,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
         public async Task Post_WithValidUser_ReturnsCreatedUser()
         {
             // Arrange
-            var newUser = new UserForCreation
+            var newUser = new UserForCreationDto
             {
                 FirstName = "User",
                 LastName = "User",
@@ -142,14 +150,14 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
 
             // Assert
             var result = createdAtRouteResult.Result as CreatedAtRouteResult;
-            Assert.IsType<User>(result.Value);
+            Assert.IsType<UserDto>(result.Value);
         }
 
         [Fact]
         public async Task Authenticate_ShouldReturn_BadRequestWhenUserIsInvalid()
         {
             // Arrange
-            var newAuthenticationRequest = new AuthenticateRequest
+            var newAuthenticationRequest = new AuthenticateRequestDto
             {
                 Username = "userrrr",
                 Password = "user"
@@ -166,7 +174,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
         public async Task Authenticate_ShouldReturn_BadRequestWhenPasswordIsInvalid()
         {
             // Arrange
-            var newAuthenticationRequest = new AuthenticateRequest
+            var newAuthenticationRequest = new AuthenticateRequestDto
             {
                 Username = "user",
                 Password = "userrrr"
@@ -183,7 +191,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
         public async Task Authenticate_ShouldReturn_OkResultWhenUserIsValid()
         {
             // Arrange
-            var newAuthenticationRequest = new AuthenticateRequest
+            var newAuthenticationRequest = new AuthenticateRequestDto
             {
                 Username = "user",
                 Password = "user"
@@ -204,7 +212,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
 
             // Assert
             var okObjectResult = response.Result as OkObjectResult;
-            List<User> users = Assert.IsType<List<User>>(okObjectResult.Value);
+            List<UserDto> users = Assert.IsType<List<UserDto>>(okObjectResult.Value);
             Assert.True(users.Count <= 10);
             //TODO Assert that the list is indeed ordered
         }
@@ -213,7 +221,7 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
         public async Task Patch_ShouldReturn_NotFoundForNotFoundUser()
         {
             // Act
-            var response = await _userController.PatchAsync(0, new JsonPatchDocument<UserForPatch>());
+            var response = await _userController.PatchAsync(0, new JsonPatchDocument<UserForPatchDto>());
 
             // Assert
             Assert.IsType<NotFoundResult>(response);
@@ -233,8 +241,8 @@ namespace JLL.PizzaProblem.API.Controllers.Tests
         public async Task Patch_ShouldReturn_NoContentForFoundUserAndValidUpdate()
         {
             // Arrange
-            var jsonObject = new JsonPatchDocument<UserForPatch>();
-            var userToUpdate = new UserForPatch
+            var jsonObject = new JsonPatchDocument<UserForPatchDto>();
+            var userToUpdate = new UserForPatchDto
             {
                 FirstName = "Test",
                 LastName = "Test",

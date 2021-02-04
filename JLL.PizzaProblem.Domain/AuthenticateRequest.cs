@@ -1,13 +1,8 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace JLL.PizzaProblem.API.Models
+namespace JLL.PizzaProblem.Domain
 {
     public class AuthenticateRequest
     {
-        [Required]
         public string Username { get; set; }
-
-        [Required]
         public string Password { get; set; }
     }
 }

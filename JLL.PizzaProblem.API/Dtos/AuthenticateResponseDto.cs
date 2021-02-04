@@ -1,6 +1,6 @@
-namespace JLL.PizzaProblem.API.Models
+namespace JLL.PizzaProblem.API.Dtos
 {
-    public class AuthenticateResponse
+    public class AuthenticateResponseDto
     {
         public int Id { get; set; }
         public string FirstName { get; set; }

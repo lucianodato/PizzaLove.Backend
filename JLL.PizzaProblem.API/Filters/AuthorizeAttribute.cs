@@ -1,8 +1,8 @@
+using JLL.PizzaProblem.API.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
-using JLL.PizzaProblem.API.Models;
 using System.Threading.Tasks;
 
 namespace JLL.PizzaProblem.API.Filters
@@ -12,7 +12,7 @@ namespace JLL.PizzaProblem.API.Filters
     {
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            var task = context.HttpContext.Items["User"] as Task<User>;
+            var task = context.HttpContext.Items["User"] as Task<UserDto>;
             
             if(task != null)
             {
